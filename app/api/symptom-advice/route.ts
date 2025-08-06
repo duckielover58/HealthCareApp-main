@@ -54,10 +54,10 @@ function cleanJsonResponse(text: string): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const { symptomDescription } = await request.json()
+    const { symptomDescription, imageData } = await request.json()
 
-    if (!symptomDescription) {
-      return NextResponse.json({ error: 'Symptom description is required' }, { status: 400 })
+    if (!symptomDescription && !imageData) {
+      return NextResponse.json({ error: 'Symptom description or image is required' }, { status: 400 })
     }
 
     // Debug: Check if API key is available
@@ -83,17 +83,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for emergency symptoms first
-    const lowerCaseSymptom = symptomDescription.toLowerCase()
+    const lowerCaseSymptom = symptomDescription?.toLowerCase() || ""
     const isEmergency = medicalKnowledgeBase.emergency_symptoms.some(symptom => 
       lowerCaseSymptom.includes(symptom)
     )
 
     // Enhanced prompt with RAG context and HIPAA compliance
-    const prompt = `You are a pediatric healthcare assistant with access to medical knowledge. Your role is to provide safe, evidence-based guidance while always prioritizing patient safety.
+    let prompt = `You are a pediatric healthcare assistant with access to medical knowledge. Your role is to provide safe, evidence-based guidance while always prioritizing patient safety.
 
 CONTEXT: ${isEmergency ? 'EMERGENCY SITUATION DETECTED' : 'Non-emergency symptom assessment'}
 
-Given this symptom description: "${symptomDescription}"
+${symptomDescription ? `Given this symptom description: "${symptomDescription}"` : ''}
 
 IMPORTANT GUIDELINES:
 - Always err on the side of caution for children's health
@@ -102,6 +102,8 @@ IMPORTANT GUIDELINES:
 - Never make definitive diagnoses
 - Always recommend medical attention for serious symptoms
 - Follow HIPAA principles: minimize data collection, ensure privacy, provide secure guidance
+- If analyzing an image, focus on visible symptoms, injuries, rashes, swelling, or other concerning signs
+- Be specific about what you observe in the image and what it might indicate
 
 Please provide advice in the following JSON format:
 {
@@ -121,7 +123,23 @@ Respond only with valid JSON, no additional text or markdown formatting.`
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
     console.log('Attempting to call Gemini API...')
-    const result = await model.generateContent(prompt)
+    
+    let result
+    if (imageData) {
+      // If there's an image, use multimodal analysis
+      const imagePart = {
+        inlineData: {
+          data: imageData.split(',')[1], // Remove data:image/jpeg;base64, prefix
+          mimeType: "image/jpeg"
+        }
+      }
+      
+      result = await model.generateContent([prompt, imagePart])
+    } else {
+      // Text-only analysis
+      result = await model.generateContent(prompt)
+    }
+    
     const response = await result.response
     const text = response.text()
 
@@ -145,7 +163,8 @@ Respond only with valid JSON, no additional text or markdown formatting.`
         privacyLevel: "HIPAA-compliant",
         dataRetention: "session-only",
         encryption: "enabled",
-        model: "gemini-1.5-flash"
+        model: "gemini-1.5-flash",
+        hasImage: !!imageData
       }
     }
 

@@ -1,13 +1,16 @@
 import type { SymptomAdvice } from "./types"
 
-export async function getSymptomAdvice(symptomDescription: string): Promise<SymptomAdvice> {
+export async function getSymptomAdvice(symptomDescription: string, imageData?: string): Promise<SymptomAdvice> {
   try {
     const response = await fetch('/api/symptom-advice', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ symptomDescription }),
+      body: JSON.stringify({ 
+        symptomDescription,
+        imageData 
+      }),
     })
 
     if (!response.ok) {
