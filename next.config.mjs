@@ -5,7 +5,7 @@ const nextConfig = {
   images: {
     unoptimized: true
   },
-  // Disable API routes for static export
+  // Ensure proper static export
   distDir: 'out',
 }
 
