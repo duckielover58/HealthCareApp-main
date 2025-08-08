@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
+// Static export configuration
+export const dynamic = 'force-static'
+export const revalidate = false
+
 // Initialize Gemini with secure API key handling
 const apiKey = process.env.GEMINI_API_KEY
 if (!apiKey) {

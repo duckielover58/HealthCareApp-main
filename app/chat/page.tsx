@@ -22,7 +22,7 @@ import {
   Image as ImageIcon
 } from "lucide-react"
 import Header from "@/components/header"
-import { getSymptomAdvice } from "@/lib/symptom-service"
+import { getSymptomAdviceClient } from "@/lib/client-api"
 import CameraPrivacyNotice from "@/components/camera-privacy-notice"
 
 interface Message {
@@ -176,7 +176,7 @@ export default function ChatPage() {
         symptomDescription = `${symptomDescription ? symptomDescription + '. ' : ''}Please analyze this image for visible symptoms, injuries, rashes, or other health concerns.`
       }
 
-      const advice = await getSymptomAdvice(symptomDescription, capturedImage || undefined)
+      const advice = await getSymptomAdviceClient(symptomDescription, capturedImage || undefined)
       
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),

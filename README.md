@@ -1,164 +1,191 @@
-# HealthBuddy - Your Friendly Health Helper
+# 🏥 Healthcare Symptom Checker App
 
-A safe, simple health advice app designed specifically for children and teens aged 8-15. HealthBuddy provides easy-to-understand guidance for minor health concerns while always encouraging consultation with parents, guardians, or healthcare providers.
-
-## 🎯 Mission
-
-To provide children and teens with fast, clear, and safe healthcare guidance using a retrieval-augmented LLM (RAG) grounded in trusted medical sources. The app will always encourage a real doctor visit as a final recommendation.
+A modern, privacy-focused healthcare application that helps users assess symptoms through AI-powered chat and guided quizzes. Features image analysis for visual symptom assessment.
 
 ## ✨ Features
 
-### Core Features
-- **Simple Symptom Input**: Describe symptoms in your own words or use guided questions
-- **Safe Health Advice**: Get easy-to-understand recommendations for minor health issues
-- **Emergency Recognition**: Automatically identifies serious symptoms and directs to emergency care
-- **Privacy-First**: No personal data collection, session-based storage only
-- **Feedback System**: Rate advice helpfulness and get follow-up options
+### 🤖 AI-Powered Analysis
+- **Chat Interface**: Direct conversation with AI health assistant
+- **Image Analysis**: Take photos or upload images for visual symptom assessment
+- **Guided Quiz**: Step-by-step symptom assessment
+- **RAG Integration**: Grounded medical knowledge for accurate advice
 
-### Safety Features
-- **Always Encourages Doctor Consultation**: Every response includes when to see a healthcare provider
-- **Clear Disclaimers**: Prominent reminders that this is not a diagnosis
-- **Emergency Alerts**: Immediate recognition of serious symptoms
-- **Parent/Guardian Guidance**: Always suggests involving trusted adults
+### 📱 User Experience
+- **Mobile-First Design**: Responsive interface for all devices
+- **Privacy-First**: All data stays on your device
+- **User Accounts**: Login/logout with session management
+- **History Tracking**: Save and review past assessments
+- **Settings Management**: Privacy controls and account options
 
-## 🚀 Getting Started
+### 🔒 Privacy & Security
+- **HIPAA Compliant Design**: Privacy-first approach
+- **Local Storage**: Data stored in browser session
+- **No Server Storage**: Images and data processed locally
+- **Encryption**: Secure data handling
 
-### Prerequisites
-- Node.js 18+ 
-- npm or pnpm package manager
+## 🚀 Live Demo
 
-### Installation
+**Deployed on GitHub Pages**: [Your App URL Here]
+
+## 🛠️ Technology Stack
+
+- **Framework**: Next.js 15 with App Router
+- **AI**: Google Gemini (gemini-1.5-flash)
+- **UI**: Radix UI + Tailwind CSS
+- **Icons**: Lucide React
+- **Hosting**: GitHub Pages (Free)
+
+## 📸 Image Analysis Features
+
+### Camera Integration
+- 📱 **Live Camera**: Take photos directly in the app
+- 📁 **File Upload**: Upload existing images
+- 🔒 **Privacy Notice**: Clear information about data usage
+- 🎯 **AI Analysis**: Visual symptom detection
+
+### Supported Image Types
+- Rashes and skin conditions
+- Cuts and injuries
+- Swelling and inflammation
+- General health concerns
+
+## 🚀 Quick Start
+
+### Local Development
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd v0HealthCareApp-main
+   git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+   cd YOUR_REPO_NAME
    ```
 
 2. **Install dependencies**
    ```bash
    npm install
-   # or
-   pnpm install
    ```
 
-3. **Run the development server**
+3. **Set up environment variables**
+   ```bash
+   # Create .env.local file
+   GEMINI_API_KEY=your_gemini_api_key_here
+   NODE_ENV=development
+   ```
+
+4. **Run the development server**
    ```bash
    npm run dev
-   # or
-   pnpm dev
    ```
 
-4. **Open your browser**
+5. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
-### Building for Production
+### Deploy to GitHub Pages
 
-```bash
-npm run build
-npm start
+1. **Create GitHub Repository**
+   - Go to GitHub and create a new public repository
+   - Name it something like `healthcare-app`
+
+2. **Push Your Code**
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit"
+   git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+   git push -u origin main
+   ```
+
+3. **Enable GitHub Pages**
+   - Go to repository Settings → Pages
+   - Select "GitHub Actions" as source
+   - Wait 5-10 minutes for deployment
+
+4. **Your app will be live at**
+   ```
+   https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/
+   ```
+
+## 📋 Usage Guide
+
+### Chat with AI
+1. Click "Chat with AI" on the home page
+2. Type your symptoms or use the camera/upload buttons
+3. Send your message and get AI-powered advice
+4. Review recommendations and doctor consultation reasons
+
+### Guided Quiz
+1. Click "Guided Quiz" on the home page
+2. Answer questions about your symptoms
+3. Get personalized recommendations
+4. Save results to your history
+
+### Image Analysis
+1. In the chat interface, click "Camera" or "Upload"
+2. Take a photo or select an image
+3. Add optional text description
+4. Get AI analysis of visual symptoms
+
+## 🔧 Configuration
+
+### Environment Variables
+
+Create a `.env.local` file in the root directory:
+
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+NODE_ENV=development
 ```
 
-## 📱 How to Use
+### Getting a Gemini API Key
 
-### 1. Describe Your Symptoms
-- **Free Text**: Write about your symptoms in your own words
-- **Guided Questions**: Answer simple questions about what's wrong, where it hurts, and how bad it is
+1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Create a new API key
+3. Add it to your `.env.local` file
 
-### 2. Get Advice
-- **What to Do**: Step-by-step instructions for treating minor issues
-- **Why It Helps**: Simple explanations of why the treatment works
-- **When to See a Doctor**: Clear guidance on when professional help is needed
+## 📁 Project Structure
 
-### 3. Follow Up
-- **Rate Helpfulness**: Let us know if the advice was useful
-- **Try Again**: Get different advice if needed
-- **Emergency Guidance**: Immediate direction if symptoms are serious
-
-## 🛡️ Safety & Ethics
-
-### Medical Disclaimer
-HealthBuddy provides general health information only and is not a substitute for professional medical advice. Always consult with a parent, guardian, or healthcare provider for proper diagnosis and treatment.
-
-### Data Privacy
-- No personal health data is stored permanently
-- Session-based storage only
-- No user accounts or profiles
-- No data sharing with third parties
-
-### Emergency Situations
-The app recognizes serious symptoms and will:
-- Immediately direct users to tell an adult
-- Provide emergency contact information
-- Never delay seeking professional medical help
-
-## 🏗️ Technical Architecture
-
-### Frontend
-- **Next.js 15**: React framework with App Router
-- **TypeScript**: Type-safe development
-- **Tailwind CSS**: Utility-first styling
-- **Radix UI**: Accessible component library
-- **Lucide React**: Icon library
-
-### Backend (Mock Implementation)
-- **Symptom Service**: Keyword-based advice system
-- **Future RAG Integration**: OpenAI + vector database planned
-- **Session Storage**: Temporary data storage
-
-### Key Components
-- `app/symptom/page.tsx`: Main symptom input interface
-- `app/results/page.tsx`: Advice display with feedback
-- `app/history/page.tsx`: Past symptom tracking
-- `components/disclaimer.tsx`: Safety disclaimers
-- `lib/symptom-service.ts`: Advice generation logic
-
-## 🎨 Design Principles
-
-### User Experience
-- **Simple & Clear**: Easy-to-understand language for children
-- **Non-Clinical**: Friendly, approachable design
-- **Accessible**: WCAG compliant components
-- **Mobile-First**: Optimized for mobile devices
-
-### Visual Design
-- **Friendly Colors**: Blue gradient background, warm accents
-- **Clear Typography**: Readable fonts with good contrast
-- **Helpful Icons**: Intuitive iconography
-- **Responsive Layout**: Works on all screen sizes
-
-## 🔮 Future Enhancements
-
-### Planned Features
-- **Voice Input**: Speech-to-text for younger users
-- **User Accounts**: Secure login with parent consent
-- **Symptom Tracking**: Progress monitoring over time
-- **RAG Integration**: Real AI-powered advice system
-- **Multi-language Support**: Spanish and other languages
-
-### Technical Improvements
-- **Real Backend**: Node.js/Express API
-- **Database**: PostgreSQL for user data
-- **Authentication**: Secure user management
-- **Analytics**: Usage insights (anonymized)
+```
+├── app/                    # Next.js App Router pages
+│   ├── chat/              # Chat interface with AI
+│   ├── quiz/              # Guided symptom quiz
+│   ├── history/           # User assessment history
+│   ├── settings/          # User settings and privacy
+│   └── api/               # API routes (development only)
+├── components/            # Reusable UI components
+│   ├── ui/               # Radix UI components
+│   └── camera-privacy-notice.tsx
+├── lib/                   # Utility functions and services
+│   ├── client-api.ts     # Client-side API service
+│   ├── symptom-service.ts # Symptom analysis service
+│   └── types.ts          # TypeScript type definitions
+└── public/               # Static assets
+```
 
 ## 🤝 Contributing
 
-We welcome contributions that improve safety, accessibility, and user experience. Please ensure all changes:
-
-1. Maintain safety standards
-2. Include appropriate disclaimers
-3. Test with target age group
-4. Follow accessibility guidelines
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## ⚠️ Important Notice
+## ⚠️ Disclaimer
 
-**HealthBuddy is not a medical device and does not provide medical diagnosis or treatment. Always consult with qualified healthcare professionals for medical advice.**
+This application is for informational purposes only and should not replace professional medical advice. Always consult with a healthcare provider for proper diagnosis and treatment.
 
----
+## 🆘 Support
 
-Built with ❤️ for the health and safety of children and teens everywhere.
+If you encounter any issues:
+1. Check the [Issues](https://github.com/YOUR_USERNAME/YOUR_REPO_NAME/issues) page
+2. Review the deployment logs in GitHub Actions
+3. Ensure all environment variables are set correctly
+
+## 🎉 Acknowledgments
+
+- Built with Next.js and Tailwind CSS
+- AI powered by Google Gemini
+- UI components from Radix UI
+- Icons from Lucide React

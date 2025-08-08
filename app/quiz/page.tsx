@@ -16,7 +16,7 @@ import {
   RefreshCw
 } from "lucide-react"
 import Header from "@/components/header"
-import { getSymptomAdvice } from "@/lib/symptom-service"
+import { getSymptomAdviceClient } from "@/lib/client-api"
 
 interface Question {
   id: string
@@ -111,7 +111,7 @@ export default function QuizPage() {
     const symptomDescription = buildSymptomDescription()
     
     try {
-      const result = await getSymptomAdvice(symptomDescription)
+      const result = await getSymptomAdviceClient(symptomDescription)
       setAdvice(result)
 
       // Save to history

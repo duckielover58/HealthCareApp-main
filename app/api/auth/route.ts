@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+// Static export configuration
+export const dynamic = 'force-static'
+export const revalidate = false
+
 // Simple in-memory user store (in production, use a database)
 const users = new Map<string, { password: string; history: any[] }>()
 
