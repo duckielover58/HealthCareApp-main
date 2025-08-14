@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
@@ -37,16 +37,65 @@ interface Message {
   image?: string // Base64 image data
 }
 
+interface QuizContext {
+  answers: Record<string, string>
+  symptomType?: string
+  severity?: string
+  duration?: string
+  location?: string
+}
+
 export default function ChatPage() {
   const router = useRouter()
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      type: 'assistant',
-      content: "Hi! I'm your health assistant. I'm here to help you understand your symptoms and provide guidance. You can describe your symptoms in text or take a photo for visual analysis. What's bothering you today?",
-      timestamp: new Date()
+  const searchParams = useSearchParams()
+  const [quizContext, setQuizContext] = useState<QuizContext | null>(null)
+  const [showContextPopup, setShowContextPopup] = useState(true)
+  
+  // Get quiz data from URL if available
+  useEffect(() => {
+    const quizParam = searchParams.get('quiz')
+    if (quizParam) {
+      try {
+        const quizData = JSON.parse(decodeURIComponent(quizParam))
+        setQuizContext(quizData)
+        // Auto-hide context popup after 5 seconds
+        const timer = setTimeout(() => {
+          setShowContextPopup(false)
+        }, 5000)
+        return () => clearTimeout(timer)
+      } catch (error) {
+        console.error('Error parsing quiz data:', error)
+      }
     }
-  ])
+  }, [searchParams])
+
+  // Generate personalized welcome message based on quiz context
+  const getWelcomeMessage = (): string => {
+    if (!quizContext) {
+      return "Hi! I'm your health assistant. I'm here to help you understand your symptoms and provide guidance. You can describe your symptoms in text or take a photo for visual analysis. What's bothering you today?"
+    }
+
+    const { symptomType, severity, duration, location } = quizContext
+    let message = `Hi! I see you recently completed a health assessment about ${symptomType?.toLowerCase() || 'your symptoms'}. `
+    
+    if (severity) {
+      message += `Based on your answers, this appears to be ${severity.toLowerCase()} in severity. `
+    }
+    
+    if (duration) {
+      message += `You mentioned this has been going on for ${duration.toLowerCase()}. `
+    }
+    
+    if (location && location !== 'All over') {
+      message += `The problem is located in your ${location.toLowerCase()}. `
+    }
+    
+    message += `I'm here to provide personalized follow-up advice and answer any additional questions you might have. You can also take photos for visual analysis. What would you like to know more about?`
+    
+    return message
+  }
+
+  const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [showCamera, setShowCamera] = useState(false)
@@ -57,6 +106,18 @@ export default function ChatPage() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Initialize messages with personalized welcome message
+  useEffect(() => {
+    setMessages([
+      {
+        id: '1',
+        type: 'assistant',
+        content: getWelcomeMessage(),
+        timestamp: new Date()
+      }
+    ])
+  }, [quizContext])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -169,7 +230,40 @@ export default function ChatPage() {
     setIsLoading(true)
 
     try {
+      // Build conversation context for the AI
+      let conversationContext = ""
+      if (messages.length > 1) { // Skip the initial welcome message
+        const recentMessages = messages.slice(1).map(msg => 
+          `${msg.type === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
+        ).join('\n')
+        conversationContext = `Previous conversation:\n${recentMessages}\n\n`
+      }
+
       let symptomDescription = input.trim()
+      
+      // Add quiz context to provide personalized advice
+      if (quizContext) {
+        const contextInfo = []
+        if (quizContext.symptomType) {
+          contextInfo.push(`Primary symptom: ${quizContext.symptomType}`)
+        }
+        if (quizContext.severity) {
+          contextInfo.push(`Severity: ${quizContext.severity}`)
+        }
+        if (quizContext.duration) {
+          contextInfo.push(`Duration: ${quizContext.duration}`)
+        }
+        if (quizContext.location && quizContext.location !== 'All over') {
+          contextInfo.push(`Location: ${quizContext.location}`)
+        }
+        
+        if (contextInfo.length > 0) {
+          symptomDescription = `Context from recent health assessment: ${contextInfo.join(', ')}. ${symptomDescription ? 'Additional details: ' + symptomDescription : ''}`
+        }
+      }
+      
+      // Combine conversation context with current request
+      const fullPrompt = `${conversationContext}Current request: ${symptomDescription}`
       
       // If there's an image, add image analysis to the description
       if (capturedImage) {
@@ -201,7 +295,8 @@ export default function ChatPage() {
         recommendations: advice.recommendations,
         doctorReasons: advice.doctorReasons,
         explanation: advice.explanation,
-        hasImage: !!capturedImage
+        hasImage: !!capturedImage,
+        quizContext: quizContext // Include quiz context in history
       }
 
       const existingHistory = sessionStorage.getItem('healthHistory')
@@ -246,8 +341,39 @@ export default function ChatPage() {
     }
   }
 
+  // Check if the current context involves private areas or bodily fluids
+  const shouldDisableImageCapture = (): boolean => {
+    if (!quizContext) return false
+    
+    const { symptomType, location } = quizContext
+    
+    // Private body areas
+    const privateAreas = ['genitals', 'private parts', 'intimate areas', 'breasts', 'buttocks']
+    if (location && privateAreas.some(area => location.toLowerCase().includes(area))) {
+      return true
+    }
+    
+    // Bodily fluids (excluding snot and saliva)
+    const bodilyFluids = ['blood', 'urine', 'feces', 'stool', 'vomit', 'pus', 'discharge', 'semen', 'vaginal fluid']
+    const symptomText = symptomType?.toLowerCase() || ''
+    
+    if (bodilyFluids.some(fluid => symptomText.includes(fluid))) {
+      return true
+    }
+    
+    // Check for specific symptoms that involve bodily fluids
+    const fluidRelatedSymptoms = ['bleeding', 'hemorrhage', 'incontinence', 'diarrhea', 'constipation', 'vomiting']
+    if (fluidRelatedSymptoms.some(symptom => symptomText.includes(symptom))) {
+      return true
+    }
+    
+    return false
+  }
+
+  const isImageCaptureDisabled = shouldDisableImageCapture()
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header />
       
       {/* Chat Header */}
@@ -323,7 +449,7 @@ export default function ChatPage() {
       )}
 
       {/* Messages */}
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="max-w-4xl mx-auto px-4 py-6 pb-40">
         <div className="space-y-4 mb-4">
           {messages.map((message) => (
             <div
@@ -449,12 +575,40 @@ export default function ChatPage() {
       {/* Input */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
         <div className="max-w-4xl mx-auto">
+          {/* Quiz Context Indicator */}
+          {quizContext && (
+            <div 
+              className={`mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg transition-all duration-500 ease-in-out ${
+                showContextPopup ? 'opacity-100 max-h-32' : 'opacity-0 max-h-0 overflow-hidden'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm text-blue-800">
+                  <CheckCircle className="w-4 h-4" />
+                  <span className="font-medium">Personalized Context Available</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowContextPopup(false)}
+                  className="text-blue-600 hover:text-blue-800 p-1 h-6 w-6"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="text-xs text-blue-600 mt-1">
+                I have access to your recent health assessment and can provide tailored advice for your {quizContext.symptomType?.toLowerCase() || 'symptoms'}.
+              </div>
+            </div>
+          )}
+          
           {/* Image Controls */}
           <div className="flex gap-2 mb-3">
             <Button
               variant="outline"
               size="sm"
               onClick={handleCameraClick}
+              disabled={isImageCaptureDisabled}
               className="flex items-center gap-2"
             >
               <Camera className="w-4 h-4" />
@@ -464,6 +618,7 @@ export default function ChatPage() {
               variant="outline"
               size="sm"
               onClick={() => fileInputRef.current?.click()}
+              disabled={isImageCaptureDisabled}
               className="flex items-center gap-2"
             >
               <Upload className="w-4 h-4" />
@@ -477,6 +632,13 @@ export default function ChatPage() {
               className="hidden"
             />
           </div>
+          
+          {/* Explanation for disabled image capture */}
+          {isImageCaptureDisabled && (
+            <div className="mb-3 p-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-600">
+              📷 Image capture is disabled for privacy and safety reasons related to your symptoms.
+            </div>
+          )}
           
           <div className="flex gap-3">
             <Input

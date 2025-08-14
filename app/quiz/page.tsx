@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -17,6 +17,7 @@ import {
 } from "lucide-react"
 import Header from "@/components/header"
 import { getSymptomAdviceClient } from "@/lib/client-api"
+import { fetchNextQuestions } from "@/lib/quiz-service"
 
 interface Question {
   id: string
@@ -31,37 +32,14 @@ interface QuizState {
   symptoms: string[]
 }
 
-const questions: Question[] = [
+const baseQuestions: Question[] = [
   {
     id: "symptom-type",
     question: "What type of problem are you experiencing?",
     options: ["Pain", "Fever", "Cough/Cold", "Stomach Issues", "Skin Problems", "Injury", "Other"],
     category: "symptom"
   },
-  {
-    id: "location",
-    question: "Where on your body is the problem?",
-    options: ["Head", "Throat", "Chest", "Stomach", "Arm/Hand", "Leg/Foot", "Back", "All over"],
-    category: "location"
-  },
-  {
-    id: "severity",
-    question: "How bad is it?",
-    options: ["Mild - annoying but manageable", "Moderate - uncomfortable", "Severe - very painful", "Emergency - can't function"],
-    category: "severity"
-  },
-  {
-    id: "duration",
-    question: "How long have you had this problem?",
-    options: ["Just started (less than 1 hour)", "A few hours", "A day or two", "Several days", "A week or more"],
-    category: "duration"
-  },
-  {
-    id: "additional",
-    question: "Are you experiencing any of these additional symptoms?",
-    options: ["Fever", "Nausea/Vomiting", "Dizziness", "Difficulty breathing", "None of these"],
-    category: "additional"
-  }
+  // The rest of the questions will be determined dynamically based on answers
 ]
 
 export default function QuizPage() {
@@ -73,19 +51,248 @@ export default function QuizPage() {
   })
   const [isLoading, setIsLoading] = useState(false)
   const [advice, setAdvice] = useState<any>(null)
+  const [activeQuestions, setActiveQuestions] = useState<Question[]>(baseQuestions)
 
-  const currentQuestion = questions[quizState.currentStep]
-  const progress = ((quizState.currentStep + 1) / questions.length) * 100
+  const currentQuestion = activeQuestions[quizState.currentStep]
+  const progress = useMemo(() => ((quizState.currentStep + 1) / activeQuestions.length) * 100, [quizState.currentStep, activeQuestions.length])
+
+  // Handle location-based question adaptation
+  useEffect(() => {
+    if (currentQuestion?.id === "location" && quizState.answers["location"]) {
+      const symptom = (quizState.answers["symptom-type"] || "").toLowerCase()
+      const loc = (quizState.answers["location"] || "").toLowerCase()
+
+      let followUps: Question[] = []
+
+      if (symptom === "pain") {
+        followUps = [
+          {
+            id: "pain-character",
+            question: `What does the ${loc || "pain"} feel like?`,
+            options: ["Sharp", "Dull/aching", "Throbbing", "Burning", "Cramping"],
+            category: "detail"
+          },
+          {
+            id: "pain-onset",
+            question: "How did it start?",
+            options: ["Suddenly", "Gradually", "After an injury", "Unsure"],
+            category: "detail"
+          },
+          {
+            id: "pain-aggravators",
+            question: "What makes it worse?",
+            options: ["Movement", "Touch/pressure", "Eating", "Breathing", "Nothing specific"],
+            category: "detail"
+          }
+        ]
+      } else if (symptom === "injury") {
+        followUps = [
+          {
+            id: "injury-mechanism",
+            question: "How did the injury happen?",
+            options: ["Fall", "Twisted", "Hit by object", "Sports", "Other"],
+            category: "detail"
+          },
+          {
+            id: "injury-signs",
+            question: "Do you notice any of these?",
+            options: ["Swelling", "Bruising", "Deformity", "Can't bear weight", "None of these"],
+            category: "detail"
+          }
+        ]
+      } else if (symptom === "skin problems") {
+        followUps = [
+          {
+            id: "skin-appearance",
+            question: "What does the skin look like?",
+            options: ["Red rash", "Hives", "Blister", "Peeling", "Warm/red area"],
+            category: "detail"
+          },
+          {
+            id: "skin-symptoms",
+            question: "Any of these with it?",
+            options: ["Itchy", "Painful", "Spreading quickly", "Pus/drainage", "None of these"],
+            category: "detail"
+          }
+        ]
+      }
+
+      if (followUps.length > 0) {
+        const prefix = activeQuestions.slice(0, quizState.currentStep + 1)
+        setActiveQuestions([...prefix, ...followUps])
+      }
+    }
+  }, [quizState.answers["location"], quizState.answers["symptom-type"], currentQuestion?.id, quizState.currentStep, activeQuestions])
 
   const handleAnswer = (answer: string) => {
     setQuizState(prev => ({
       ...prev,
       answers: { ...prev.answers, [currentQuestion.id]: answer }
     }))
+
+    // Adapt the remaining flow after the first step(s)
+    if (currentQuestion.id === "symptom-type") {
+      const symptom = answer.toLowerCase()
+
+      if (symptom === "fever") {
+        // Fever flow: skip location, use temperature-focused severity
+        setActiveQuestions([
+          baseQuestions[0],
+          {
+            id: "fever-severity",
+            question: "How high is the fever?",
+            options: [
+              "Low (99–100.4°F / 37.2–38°C)",
+              "Moderate (100.4–102.2°F / 38–39°C)",
+              "High (102.2–104°F / 39–40°C)",
+              "Very High (>104°F / >40°C)"
+            ],
+            category: "severity"
+          },
+          {
+            id: "duration",
+            question: "How long has the fever been present?",
+            options: ["Less than 24 hours", "1–2 days", "3–4 days", "5+ days"],
+            category: "duration"
+          },
+          {
+            id: "additional",
+            question: "Any of these with the fever?",
+            options: [
+              "Stiff neck",
+              "Severe headache",
+              "Rash",
+              "Trouble breathing",
+              "None of these"
+            ],
+            category: "additional"
+          }
+        ])
+        return
+      }
+
+      if (symptom === "cough/cold") {
+        setActiveQuestions([
+          baseQuestions[0],
+          {
+            id: "cough-type",
+            question: "What best describes the cough/cold?",
+            options: [
+              "Dry cough",
+              "Wet/productive cough",
+              "Sore throat",
+              "Runny or stuffy nose"
+            ],
+            category: "symptom-detail"
+          },
+          {
+            id: "duration",
+            question: "How long have you had these symptoms?",
+            options: ["< 24 hours", "1–3 days", "4–7 days", "Over a week"],
+            category: "duration"
+          },
+          {
+            id: "additional",
+            question: "Any of these additional symptoms?",
+            options: ["Fever", "Chest pain", "Wheezing", "None of these"],
+            category: "additional"
+          }
+        ])
+        return
+      }
+
+      if (symptom === "stomach issues") {
+        setActiveQuestions([
+          baseQuestions[0],
+          {
+            id: "gi-symptoms",
+            question: "Which of these do you have?",
+            options: ["Nausea", "Vomiting", "Diarrhea", "Constipation", "Loss of appetite"],
+            category: "symptom-detail"
+          },
+          {
+            id: "gi-pain-type",
+            question: "What type of stomach discomfort?",
+            options: ["Cramping", "Sharp pain", "Dull ache", "Burning", "No pain"],
+            category: "symptom-detail"
+          },
+          {
+            id: "duration",
+            question: "How long have you had these symptoms?",
+            options: ["Just started", "A few hours", "A day or two", "Several days", "A week or more"],
+            category: "duration"
+          },
+          {
+            id: "additional",
+            question: "Any of these additional symptoms?",
+            options: [
+              "Fever",
+              "Dizziness",
+              "Blood in stool",
+              "Severe dehydration",
+              "None of these"
+            ],
+            category: "additional"
+          }
+        ])
+        return
+      }
+
+      // Pain/Injury/Skin: include location
+      setActiveQuestions([
+        baseQuestions[0],
+        {
+          id: "location",
+          question: "Where on your body is the problem?",
+          options: ["Head", "Throat", "Chest", "Stomach", "Arm/Hand", "Leg/Foot", "Back", "All over"],
+          category: "location"
+        },
+        {
+          id: "severity",
+          question: "How bad is it?",
+          options: [
+            "Mild - annoying but manageable",
+            "Moderate - uncomfortable",
+            "Severe - very painful",
+            "Emergency - can't function"
+          ],
+          category: "severity"
+        },
+        {
+          id: "duration",
+          question: "How long have you had this problem?",
+          options: ["Just started (less than 1 hour)", "A few hours", "A day or two", "Several days", "A week or more"],
+          category: "duration"
+        },
+        {
+          id: "additional",
+          question: "Are you experiencing any of these additional symptoms?",
+          options: [
+            "Fever",
+            "Nausea/Vomiting",
+            "Dizziness",
+            "Difficulty breathing",
+            "None of these"
+          ],
+          category: "additional"
+        }
+      ])
+    }
+    
+    // For later steps, allow LLM to refine upcoming questions (best-effort)
+    if (quizState.currentStep >= 1) {
+      fetchNextQuestions({ ...quizState.answers, [currentQuestion.id]: answer }).then((data) => {
+        if (data?.questions?.length) {
+          // Keep prior answered questions, replace tail with LLM proposals
+          const prefix = activeQuestions.slice(0, quizState.currentStep + 1)
+          setActiveQuestions([...prefix, ...data.questions])
+        }
+      })
+    }
   }
 
   const nextStep = () => {
-    if (quizState.currentStep < questions.length - 1) {
+    if (quizState.currentStep < activeQuestions.length - 1) {
       setQuizState(prev => ({
         ...prev,
         currentStep: prev.currentStep + 1
@@ -148,7 +355,9 @@ export default function QuizPage() {
       description += ` in my ${answers["location"].toLowerCase()}`
     }
     
-    if (answers["severity"]) {
+    if (answers["fever-severity"]) {
+      description += `. The fever level is ${answers["fever-severity"].toLowerCase()}`
+    } else if (answers["severity"]) {
       description += `. The severity is ${answers["severity"].toLowerCase()}`
     }
     
@@ -194,7 +403,7 @@ export default function QuizPage() {
 
   if (advice) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <Header />
         
         <div className="max-w-2xl mx-auto px-4 py-8">
@@ -269,7 +478,10 @@ export default function QuizPage() {
               {/* Action Buttons */}
               <div className="flex gap-3 pt-4">
                 <Button 
-                  onClick={() => router.push('/chat')} 
+                  onClick={() => {
+                    const quizData = encodeURIComponent(JSON.stringify(quizState.answers))
+                    router.push(`/chat?quiz=${quizData}`)
+                  }} 
                   className="flex-1"
                   variant="outline"
                 >
@@ -290,7 +502,7 @@ export default function QuizPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header />
       
       <div className="max-w-2xl mx-auto px-4 py-8">
@@ -307,7 +519,7 @@ export default function QuizPage() {
                 Back
               </Button>
               <span className="text-sm text-gray-500">
-                Step {quizState.currentStep + 1} of {questions.length}
+                Step {quizState.currentStep + 1} of {activeQuestions.length}
               </span>
             </div>
             
@@ -349,7 +561,7 @@ export default function QuizPage() {
                 disabled={!quizState.answers[currentQuestion.id]}
                 className="flex items-center gap-2"
               >
-                {quizState.currentStep === questions.length - 1 ? (
+                {quizState.currentStep === activeQuestions.length - 1 ? (
                   <>
                     {isLoading ? (
                       <>
