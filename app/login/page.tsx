@@ -1,30 +1,32 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { ArrowLeft } from "lucide-react"
 import Header from "@/components/header"
 import AuthForm from "@/components/auth-form"
+import { getCurrentUser } from "@/lib/auth-service"
 
 export default function LoginPage() {
   const router = useRouter()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   useEffect(() => {
-    checkAuthStatus()
-  }, [])
-
-  const checkAuthStatus = async () => {
-    try {
-      const response = await fetch('/api/auth')
-      const data = await response.json()
-      if (data.authenticated) {
-        setIsAuthenticated(true)
-        router.push('/')
+    const checkAuth = async () => {
+      try {
+        const user = getCurrentUser()
+        if (user) {
+          router.push('/')
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error)
       }
-    } catch (error) {
-      console.error('Auth check failed:', error)
     }
-  }
+    
+    checkAuth()
+  }, [router])
 
   const handleAuthSuccess = () => {
     router.push('/')

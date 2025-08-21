@@ -17,7 +17,7 @@ import {
 } from "lucide-react"
 import Header from "@/components/header"
 import { getSymptomAdviceClient } from "@/lib/client-api"
-import { fetchNextQuestions } from "@/lib/quiz-service"
+import { getNextQuestions } from "@/lib/quiz-service"
 
 interface Question {
   id: string
@@ -281,7 +281,7 @@ export default function QuizPage() {
     
     // For later steps, allow LLM to refine upcoming questions (best-effort)
     if (quizState.currentStep >= 1) {
-      fetchNextQuestions({ ...quizState.answers, [currentQuestion.id]: answer }).then((data) => {
+      getNextQuestions({ ...quizState.answers, [currentQuestion.id]: answer }).then((data) => {
         if (data?.questions?.length) {
           // Keep prior answered questions, replace tail with LLM proposals
           const prefix = activeQuestions.slice(0, quizState.currentStep + 1)

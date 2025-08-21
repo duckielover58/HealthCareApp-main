@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -45,7 +45,7 @@ interface QuizContext {
   location?: string
 }
 
-export default function ChatPage() {
+function ChatPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [quizContext, setQuizContext] = useState<QuizContext | null>(null)
@@ -660,5 +660,13 @@ export default function ChatPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ChatPageContent />
+    </Suspense>
   )
 } 

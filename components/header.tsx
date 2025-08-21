@@ -4,24 +4,26 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
-import { UserCircle, LogOut, History, Settings } from "lucide-react"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu"
+import { User, LogOut, Settings, History, UserCircle } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { getCurrentUser, logoutUser } from "@/lib/auth-service"
 
 interface User {
-  authenticated: boolean
-  username?: string
-  historyCount?: number
+  username: string
+  isAuthenticated: boolean
 }
 
 export default function Header() {
-  const [user, setUser] = useState<User>({ authenticated: false })
+  const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
 
   useEffect(() => {
     checkAuthStatus()
@@ -29,11 +31,11 @@ export default function Header() {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await fetch('/api/auth')
-      const data = await response.json()
-      setUser(data)
+      const currentUser = getCurrentUser()
+      setUser(currentUser)
     } catch (error) {
       console.error('Auth check failed:', error)
+      setUser(null)
     } finally {
       setIsLoading(false)
     }
@@ -41,12 +43,9 @@ export default function Header() {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'logout' }),
-      })
-      setUser({ authenticated: false })
+      logoutUser()
+      setUser(null)
+      router.push('/login')
     } catch (error) {
       console.error('Logout failed:', error)
     }
@@ -62,7 +61,7 @@ export default function Header() {
           <ModeToggle />
           
           {!isLoading && (
-            user.authenticated ? (
+            user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="icon">
@@ -78,7 +77,7 @@ export default function Header() {
                   <DropdownMenuItem asChild>
                     <Link href="/history" className="flex items-center gap-2">
                       <History className="w-4 h-4" />
-                      History ({user.historyCount || 0})
+                      History
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>

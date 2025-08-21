@@ -2,23 +2,14 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { 
-  ArrowLeft, 
-  Shield, 
-  Trash2, 
-  User, 
-  Lock, 
-  Eye, 
-  Bell,
-  Download,
-  AlertTriangle
-} from "lucide-react"
+import { ArrowLeft, Trash2, AlertTriangle, User, Shield, Lock, Download } from "lucide-react"
 import Header from "@/components/header"
+import { getCurrentUser, logoutUser } from "@/lib/auth-service"
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -38,12 +29,10 @@ export default function SettingsPage() {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await fetch('/api/auth')
-      const data = await response.json()
-      
-      if (data.authenticated) {
+      const user = await getCurrentUser()
+      if (user) {
         setIsAuthenticated(true)
-        setUsername(data.username || '')
+        setUsername(user.username || '')
       } else {
         router.push('/login')
       }
@@ -55,11 +44,7 @@ export default function SettingsPage() {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'logout' }),
-      })
+      await logoutUser()
       router.push('/')
     } catch (error) {
       console.error('Logout failed:', error)
@@ -73,11 +58,7 @@ export default function SettingsPage() {
       localStorage.clear()
       
       // In a real app, you'd call an API to delete the account
-      await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'logout' }),
-      })
+      await logoutUser() // Assuming logoutUser handles account deletion
       
       router.push('/')
     } catch (error) {

@@ -2,20 +2,21 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { 
   ArrowLeft, 
-  Calendar, 
   Clock, 
   AlertTriangle, 
   CheckCircle, 
   Shield,
   Trash2,
-  RefreshCw
+  RefreshCw,
+  History
 } from "lucide-react"
 import Header from "@/components/header"
+import { getCurrentUser } from "@/lib/auth-service"
 
 interface HistoryItem {
   id: string
@@ -39,10 +40,9 @@ export default function HistoryPage() {
 
   const checkAuthAndLoadHistory = async () => {
     try {
-      const response = await fetch('/api/auth')
-      const data = await response.json()
+      const user = await getCurrentUser()
       
-      if (data.authenticated) {
+      if (user) {
         setIsAuthenticated(true)
         // In a real app, you'd fetch history from an API
         // For now, we'll use sessionStorage
@@ -143,7 +143,7 @@ export default function HistoryPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="text-center py-12">
-                <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <History className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">No History Yet</h3>
                 <p className="text-gray-600 mb-6">
                   Your health assessments will appear here once you start using the app.

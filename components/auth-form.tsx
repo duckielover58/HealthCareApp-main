@@ -1,12 +1,13 @@
 "use client"
 
 import { useState } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { User, Lock, Eye, EyeOff } from "lucide-react"
+import { loginUser, registerUser } from "@/lib/auth-service"
 
 interface AuthFormProps {
   onSuccess: () => void
@@ -26,27 +27,20 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
     setError("")
 
     try {
-      const response = await fetch('/api/auth', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: isLogin ? 'login' : 'register',
-          username,
-          password,
-        }),
-      })
+      let result
+      if (isLogin) {
+        result = await loginUser(username, password)
+      } else {
+        result = await registerUser(username, password)
+      }
 
-      const data = await response.json()
-
-      if (response.ok) {
+      if (result.success) {
         onSuccess()
       } else {
-        setError(data.error || 'Authentication failed')
+        setError(result.error || 'Authentication failed')
       }
     } catch (error) {
-      setError('Network error. Please try again.')
+      setError('Authentication failed. Please try again.')
     } finally {
       setIsLoading(false)
     }
