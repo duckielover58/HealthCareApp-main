@@ -21,9 +21,9 @@ const medicalKnowledgeBase = {
     "severe allergic reaction", "poisoning", "broken bones", "severe burns"
   ],
   pediatric_guidelines: {
-    fever: "Children under 3 months with fever need immediate medical attention",
+    fever: "If you're under 3 months old with fever, you need immediate medical attention",
     dehydration: "Signs include dry mouth, no tears, sunken eyes, decreased urination",
-    head_injury: "Any head injury in children requires medical evaluation",
+    head_injury: "Any head injury requires medical evaluation",
     breathing: "Rapid breathing, wheezing, or difficulty breathing needs immediate care"
   },
   home_remedies: {
@@ -93,15 +93,15 @@ export async function POST(request: NextRequest) {
     )
 
     // Enhanced prompt with RAG context and HIPAA compliance
-    let prompt = `You are a pediatric healthcare assistant with access to medical knowledge. Your role is to provide safe, evidence-based guidance while always prioritizing patient safety.
+    let prompt = `You are a healthcare assistant with access to medical knowledge. Your role is to provide safe, evidence-based guidance while always prioritizing patient safety.
 
 CONTEXT: ${isEmergency ? 'EMERGENCY SITUATION DETECTED' : 'Non-emergency symptom assessment'}
 
 ${symptomDescription ? `Given this symptom description: "${symptomDescription}"` : ''}
 
 IMPORTANT GUIDELINES:
-- Always err on the side of caution for children's health
-- Use simple, child-friendly language
+- Always err on the side of caution for your health
+- Use simple, easy-to-understand language
 - Provide specific, actionable advice
 - Never make definitive diagnoses
 - Always recommend medical attention for serious symptoms

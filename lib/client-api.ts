@@ -98,7 +98,7 @@ function getFallbackAdvice(symptomDescription: string, imageData?: string): Symp
         "Rest in a quiet, dark room",
         "Drink plenty of water",
         "Apply a cool cloth to your forehead",
-        "Consider over-the-counter pain relief (consult doctor for children)"
+        "Consider over-the-counter pain relief (consult your doctor)"
       ],
       explanation: "Headaches can be caused by dehydration, stress, eye strain, or other factors. Rest and hydration often help.",
       doctorReasons: [
@@ -141,7 +141,7 @@ function getFallbackAdvice(symptomDescription: string, imageData?: string): Symp
         "Are you able to keep fluids down?",
         "Do you have a fever?"
       ],
-      safetyNotes: "Dehydration can be serious, especially in children. Seek medical attention if unable to keep fluids down."
+      safetyNotes: "Dehydration can be serious, especially for young people. Seek medical attention if unable to keep fluids down."
     }
   }
 

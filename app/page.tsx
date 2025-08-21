@@ -23,8 +23,8 @@ export default function HomePage() {
     },
     {
       icon: <Heart className="w-6 h-6" />,
-      title: "Child-Friendly",
-      description: "Simple language and guided questions designed for young users"
+      title: "User-Friendly",
+      description: "Simple language and guided questions designed for everyone"
     },
     {
       icon: <MessageCircle className="w-6 h-6" />,

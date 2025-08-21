@@ -83,7 +83,7 @@ function getMockAdvice(symptomDescription: string): SymptomAdvice {
         "Rest in a quiet, dark room",
         "Drink water - being dehydrated can cause headaches",
         "Put a cool cloth on your forehead",
-        "Ask an adult if you can take children's pain medicine",
+        "Ask an adult if you can take pain medicine",
       ],
       explanation:
         "Headaches can be caused by dehydration, stress, or eye strain. Rest and water often help them go away.",

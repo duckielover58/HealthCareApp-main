@@ -23,7 +23,7 @@ Prior answers JSON: ${JSON.stringify(answers)}
 Constraints:
 - Do NOT ask for body location if the symptom is fever or generalized
 - Tailor options to the chosen symptom
-- Use simple, child-friendly wording
+- Use simple, easy-to-understand wording
 Respond with JSON only, no markdown.`
 
     const result = await model.generateContent(prompt)
