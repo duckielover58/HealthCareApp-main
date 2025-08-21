@@ -29,7 +29,7 @@ export default function SettingsPage() {
 
   const checkAuthStatus = async () => {
     try {
-      const user = await getCurrentUser()
+      const user = getCurrentUser()
       if (user) {
         setIsAuthenticated(true)
         setUsername(user.username || '')
@@ -44,7 +44,7 @@ export default function SettingsPage() {
 
   const handleLogout = async () => {
     try {
-      await logoutUser()
+      logoutUser()
       router.push('/')
     } catch (error) {
       console.error('Logout failed:', error)
@@ -58,7 +58,7 @@ export default function SettingsPage() {
       localStorage.clear()
       
       // In a real app, you'd call an API to delete the account
-      await logoutUser() // Assuming logoutUser handles account deletion
+      logoutUser() // Assuming logoutUser handles account deletion
       
       router.push('/')
     } catch (error) {
@@ -67,7 +67,7 @@ export default function SettingsPage() {
   }
 
   const exportData = () => {
-    const history = sessionStorage.getItem('healthHistory')
+    const history = localStorage.getItem('healthHistory')
     if (history) {
       const dataStr = JSON.stringify(JSON.parse(history), null, 2)
       const dataBlob = new Blob([dataStr], { type: 'application/json' })
@@ -147,8 +147,8 @@ export default function SettingsPage() {
                 </div>
                 <Switch
                   checked={settings.privateMode}
-                  onCheckedChange={(checked) => 
-                    setSettings(prev => ({ ...prev, privateMode: checked }))
+                  onChange={(e) => 
+                    setSettings(prev => ({ ...prev, privateMode: e.target.checked }))
                   }
                 />
               </div>
@@ -162,8 +162,8 @@ export default function SettingsPage() {
                 </div>
                 <Switch
                   checked={settings.autoSave}
-                  onCheckedChange={(checked) => 
-                    setSettings(prev => ({ ...prev, autoSave: checked }))
+                  onChange={(e) => 
+                    setSettings(prev => ({ ...prev, autoSave: e.target.checked }))
                   }
                 />
               </div>
@@ -177,8 +177,8 @@ export default function SettingsPage() {
                 </div>
                 <Switch
                   checked={settings.dataSharing}
-                  onCheckedChange={(checked) => 
-                    setSettings(prev => ({ ...prev, dataSharing: checked }))
+                  onChange={(e) => 
+                    setSettings(prev => ({ ...prev, dataSharing: e.target.checked }))
                   }
                 />
               </div>

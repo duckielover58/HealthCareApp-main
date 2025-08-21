@@ -10,9 +10,7 @@ import {
   Clock, 
   AlertTriangle, 
   CheckCircle, 
-  Shield,
   Trash2,
-  RefreshCw,
   History
 } from "lucide-react"
 import Header from "@/components/header"
@@ -30,9 +28,8 @@ interface HistoryItem {
 
 export default function HistoryPage() {
   const router = useRouter()
-  const [history, setHistory] = useState<HistoryItem[]>([])
-  const [isLoading, setIsLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [history, setHistory] = useState<HistoryItem[]>([])
 
   useEffect(() => {
     checkAuthAndLoadHistory()
@@ -40,13 +37,12 @@ export default function HistoryPage() {
 
   const checkAuthAndLoadHistory = async () => {
     try {
-      const user = await getCurrentUser()
+      const user = getCurrentUser()
       
       if (user) {
         setIsAuthenticated(true)
-        // In a real app, you'd fetch history from an API
-        // For now, we'll use sessionStorage
-        const savedHistory = sessionStorage.getItem('healthHistory')
+        // Load history from localStorage
+        const savedHistory = localStorage.getItem('healthHistory')
         if (savedHistory) {
           setHistory(JSON.parse(savedHistory))
         }
@@ -54,15 +50,24 @@ export default function HistoryPage() {
         router.push('/login')
       }
     } catch (error) {
-      console.error('Failed to load history:', error)
-    } finally {
-      setIsLoading(false)
+      console.error('Auth check failed:', error)
+      router.push('/login')
     }
   }
 
   const clearHistory = () => {
-    sessionStorage.removeItem('healthHistory')
+    localStorage.removeItem('healthHistory')
     setHistory([])
+  }
+
+  const formatDate = (timestamp: string) => {
+    return new Date(timestamp).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
   }
 
   const getSeverityColor = (severity: string) => {
@@ -81,24 +86,8 @@ export default function HistoryPage() {
       case 'serious': return <AlertTriangle className="w-4 h-4" />
       case 'moderate': return <Clock className="w-4 h-4" />
       case 'mild': return <CheckCircle className="w-4 h-4" />
-      default: return <Shield className="w-4 h-4" />
+      default: return <History className="w-4 h-4" />
     }
-  }
-
-  const formatDate = (timestamp: string) => {
-    const date = new Date(timestamp)
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  }
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
-          <RefreshCw className="w-8 h-8 animate-spin" />
-        </div>
-      </div>
-    )
   }
 
   if (!isAuthenticated) {
@@ -117,7 +106,7 @@ export default function HistoryPage() {
             className="flex items-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Home
+            Back
           </Button>
           
           {history.length > 0 && (

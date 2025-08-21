@@ -1,28 +1,23 @@
-import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "HealthBuddy - Healthcare Guidance for Kids & Teens",
-  description: "Get simple healthcare advice for minor symptoms and injuries",
-    generator: 'v0.dev'
+  title: "HealthBuddy - Your AI Health Assistant",
+  description: "Get instant health guidance, track your symptoms, and make informed decisions about your well-being with AI-powered insights.",
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen bg-background` }>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-          {children}
-        </ThemeProvider>
+    <html lang="en">
+      <body className={inter.className}>
+        {children}
       </body>
     </html>
   )
