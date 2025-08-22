@@ -1,0 +1,10 @@
+[33mfdaa50a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Complete app rebuild: simplified components, removed complex dependencies, working static build
+[33m556bc46[m Fix GitHub Actions workflow: use --legacy-peer-deps for React 19 compatibility
+[33m5c68fc5[m Fix build issues and prepare for GitHub Pages deployment - Remove API routes for static hosting - Update dependencies for React 19 compatibility - Add client-side auth service - Fix calendar component issues - Add Suspense boundary for chat page
+[33m2dc4115[m Small changes to AI response
+[33mf1efcdf[m Updated quiz functionality
+[33mdc2744b[m Add GitHub Actions workflow for deploying static content to GitHub Pages
+[33m8b030b2[m Merge branch 'main' of https://github.com/duckielover58/v0HealthCareApp-main
+[33m4b629ce[m Fix GitHub Pages deployment: update workflow and config
+[33m69c2822[m Create nextjs.yml
+[33m51f6bde[m Attempting to go live
