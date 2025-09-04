@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { getSymptomAdviceClient } from "@/lib/client-api"
 import type { SymptomAdvice } from "@/lib/types"
 
-export default function ChatPage() {
+function ChatContent() {
   const searchParams = useSearchParams()
   const [messages, setMessages] = useState([
     {
@@ -185,4 +185,33 @@ export default function ChatPage() {
       </div>
     </div>
   )
-} 
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-white">
+      <header className="bg-blue-600 text-white p-4">
+        <div className="container mx-auto">
+          <h1 className="text-2xl font-bold">HealthBuddy</h1>
+        </div>
+      </header>
+      
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        <div className="text-center py-12">
+          <div className="inline-flex items-center gap-3">
+            <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-lg text-gray-600">Loading chat...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <ChatContent />
+    </Suspense>
+  )
+}
