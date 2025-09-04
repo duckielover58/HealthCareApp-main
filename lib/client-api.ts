@@ -71,12 +71,12 @@ function getFallbackAdvice(symptomDescription: string, imageData?: string): Symp
     return {
       severity: "emergency",
       recommendations: [
-        "Call emergency services (911) immediately",
+        "Call emergency services (911) immediately or tell an adult right away",
         "Stay calm and follow emergency operator instructions",
-        "Do not attempt to drive yourself to the hospital",
-        "Keep the person still and comfortable"
+        "Do not try to drive yourself anywhere - get help from an adult",
+        "Keep the person still and comfortable until help arrives"
       ],
-      explanation: "These symptoms indicate a medical emergency that requires immediate professional attention.",
+      explanation: "These symptoms are very serious and need immediate help from a doctor or emergency services. It's important to tell an adult right away.",
       doctorReasons: [
         "This is a life-threatening emergency",
         "Immediate medical intervention is required",
@@ -84,10 +84,10 @@ function getFallbackAdvice(symptomDescription: string, imageData?: string): Symp
       ],
       followUpQuestions: [
         "Are you still experiencing these symptoms?",
-        "Have you called emergency services?",
+        "Have you called emergency services or told an adult?",
         "Is someone with you to help?"
       ],
-      safetyNotes: "This is an emergency situation requiring immediate medical attention."
+      safetyNotes: "This is an emergency situation requiring immediate medical attention. Tell an adult right away!"
     }
   }
 
@@ -124,24 +124,27 @@ function getFallbackAdvice(symptomDescription: string, imageData?: string): Symp
     return {
       severity: "moderate",
       recommendations: [
-        "Sip clear fluids like water or broth",
-        "Avoid solid foods until symptoms improve",
-        "Rest and avoid strenuous activity",
-        "Try bland foods like crackers when ready to eat"
+        "Sip clear fluids like water, broth, or sports drinks slowly",
+        "Avoid solid foods until you feel better",
+        "Rest and take it easy - no running around or playing hard",
+        "Try bland foods like crackers or toast when you're ready to eat",
+        "Tell a parent or adult if you feel really bad"
       ],
-      explanation: "Stomach issues often resolve with rest, hydration, and a bland diet. Avoid dairy and fatty foods initially.",
+      explanation: "Stomach problems are common and usually get better with rest and drinking fluids. It's important to stay hydrated and eat simple foods.",
       doctorReasons: [
-        "Severe or persistent abdominal pain",
-        "Inability to keep fluids down",
-        "Blood in vomit or stool",
-        "High fever with stomach symptoms"
+        "Severe or persistent tummy pain that won't go away",
+        "Can't keep any fluids down (throwing up everything)",
+        "Blood in vomit or when you go to the bathroom",
+        "High fever with stomach symptoms",
+        "Feeling very weak or dizzy"
       ],
       followUpQuestions: [
         "How long have you had these symptoms?",
         "Are you able to keep fluids down?",
-        "Do you have a fever?"
+        "Do you have a fever?",
+        "Have you told a parent or adult about how you're feeling?"
       ],
-      safetyNotes: "Dehydration can be serious, especially for young people. Seek medical attention if unable to keep fluids down."
+      safetyNotes: "Dehydration can be serious, especially for kids and teens. Tell an adult if you can't keep fluids down or feel really bad."
     }
   }
 
@@ -149,23 +152,24 @@ function getFallbackAdvice(symptomDescription: string, imageData?: string): Symp
   return {
     severity: "moderate",
     recommendations: [
-      "Rest and take it easy",
-      "Stay hydrated with water",
-      "Monitor your symptoms",
-      "Contact a healthcare provider if symptoms worsen"
+      "Rest and take it easy - no rough play or sports",
+      "Drink plenty of water and stay hydrated",
+      "Watch how you're feeling and tell an adult if you feel worse",
+      "Tell a parent or adult if symptoms don't get better"
     ],
-    explanation: "Your symptoms may resolve with rest and time. Monitor for any changes and seek medical attention if needed.",
+    explanation: "Your symptoms might get better with rest and time. It's important to tell an adult how you're feeling and get help if you need it.",
     doctorReasons: [
       "Symptoms don't improve after 2-3 days",
-      "Symptoms get worse",
+      "Symptoms get worse or you feel much sicker",
       "You develop a high fever",
-      "You feel much sicker than before"
+      "You feel really bad or worried about how you feel"
     ],
     followUpQuestions: [
       "How long have you had these symptoms?",
       "Are the symptoms getting better or worse?",
-      "Do you have any other symptoms?"
+      "Do you have any other symptoms?",
+      "Have you told a parent or adult about how you're feeling?"
     ],
-    safetyNotes: "When in doubt, consult with a healthcare provider for proper evaluation and treatment."
+    safetyNotes: "When in doubt, tell an adult and ask them to help you see a doctor or healthcare provider."
   }
 } 

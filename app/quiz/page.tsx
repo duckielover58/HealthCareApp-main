@@ -31,8 +31,9 @@ export default function QuizPage() {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1)
     } else {
-      // Quiz complete - show results
-      alert("Quiz complete! Your answers: " + JSON.stringify(newAnswers, null, 2))
+      // Quiz complete - redirect to chat with context
+      const quizContext = encodeURIComponent(JSON.stringify(newAnswers))
+      window.location.href = `/chat?quiz=${quizContext}`
     }
   }
 
