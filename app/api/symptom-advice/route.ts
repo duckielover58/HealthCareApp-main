@@ -1,35 +1,99 @@
-import type { SymptomAdvice } from "./types"
+import { NextRequest, NextResponse } from 'next/server'
+import type { SymptomAdvice } from '@/lib/types'
 
-// Client-side API service
-export async function getSymptomAdviceClient(symptomDescription: string, imageData?: string): Promise<SymptomAdvice> {
+export async function POST(request: NextRequest) {
   try {
-    // Always try the API first (works in both development and production)
-    const response = await fetch('/api/symptom-advice', {
+    const { symptomDescription, imageData } = await request.json()
+    
+    if (!symptomDescription) {
+      return NextResponse.json({ error: 'Symptom description is required' }, { status: 400 })
+    }
+
+    // Use OpenAI API for real AI responses
+    const openaiApiKey = process.env.OPENAI_API_KEY
+    
+    if (!openaiApiKey) {
+      // Fallback to rule-based responses if no API key
+      return NextResponse.json(getFallbackAdvice(symptomDescription, imageData))
+    }
+
+    // Create a prompt for OpenAI
+    const prompt = `You are a helpful AI health assistant for children and teens (ages 8-15). Provide health guidance based on the symptom description. Be reassuring, use simple language, and always encourage consulting with a real doctor.
+
+Symptom description: ${symptomDescription}
+${imageData ? 'Note: User has also provided an image for analysis.' : ''}
+
+Please respond with a JSON object in this exact format:
+{
+  "severity": "mild" | "moderate" | "serious" | "emergency",
+  "recommendations": ["recommendation1", "recommendation2", "recommendation3"],
+  "explanation": "Simple explanation of what this might be",
+  "doctorReasons": ["reason1", "reason2", "reason3"],
+  "followUpQuestions": ["question1", "question2", "question3"],
+  "safetyNotes": "Important safety information if needed"
+}
+
+Guidelines:
+- Use age-appropriate language
+- Be reassuring and not scary
+- Always include reasons to see a doctor
+- Focus on general guidance, not diagnosis
+- Keep recommendations practical and simple
+- Emphasize telling adults about concerns`
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ 
-        symptomDescription,
-        imageData 
-      }),
+      body: JSON.stringify({
+        model: 'gpt-3.5-turbo',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a helpful AI health assistant for children and teens. Always respond with valid JSON in the exact format requested.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1000
+      })
     })
 
-    if (response.ok) {
-      const data = await response.json()
-      console.log('Successfully got AI response:', data)
-      return data
-    } else {
-      console.error('API response not ok:', response.status, response.statusText)
-      throw new Error(`API error: ${response.status}`)
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`)
     }
+
+    const data = await response.json()
+    const aiResponse = data.choices[0].message.content
+
+    try {
+      // Parse the JSON response from AI
+      const advice: SymptomAdvice = JSON.parse(aiResponse)
+      
+      // Validate the response structure
+      if (!advice.severity || !advice.recommendations || !advice.explanation) {
+        throw new Error('Invalid response structure from AI')
+      }
+
+      return NextResponse.json(advice)
+    } catch (parseError) {
+      console.error('Error parsing AI response:', parseError)
+      // Fallback to rule-based response if AI response is malformed
+      return NextResponse.json(getFallbackAdvice(symptomDescription, imageData))
+    }
+
   } catch (error) {
-    console.error('Error getting symptom advice from API:', error)
-    console.log('Falling back to rule-based responses')
-    return getFallbackAdvice(symptomDescription, imageData)
+    console.error('Error in symptom advice API:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
+// Fallback advice function (moved from client-api.ts)
 function getFallbackAdvice(symptomDescription: string, imageData?: string): SymptomAdvice {
   const lowerCaseSymptom = symptomDescription.toLowerCase()
   
@@ -86,7 +150,7 @@ function getFallbackAdvice(symptomDescription: string, imageData?: string): Symp
     }
   }
 
-  // Text-based symptom analysis
+  // Emergency symptoms
   if (
     lowerCaseSymptom.includes("chest pain") ||
     lowerCaseSymptom.includes("can't breathe") ||
@@ -116,6 +180,7 @@ function getFallbackAdvice(symptomDescription: string, imageData?: string): Symp
     }
   }
 
+  // Headache symptoms
   if (lowerCaseSymptom.includes("headache") || lowerCaseSymptom.includes("head hurts")) {
     return {
       severity: "moderate",
@@ -141,6 +206,7 @@ function getFallbackAdvice(symptomDescription: string, imageData?: string): Symp
     }
   }
 
+  // Stomach symptoms
   if (
     lowerCaseSymptom.includes("stomach") ||
     lowerCaseSymptom.includes("tummy") ||
@@ -173,82 +239,6 @@ function getFallbackAdvice(symptomDescription: string, imageData?: string): Symp
     }
   }
 
-  // Check for specific follow-up questions
-  if (lowerCaseSymptom.includes("is it serious") || lowerCaseSymptom.includes("should i worry")) {
-    return {
-      severity: "moderate",
-      recommendations: [
-        "Try not to worry too much - most health problems are not serious",
-        "The best way to know for sure is to talk to a doctor",
-        "Keep track of your symptoms and how you're feeling",
-        "Tell an adult if you're feeling scared or worried"
-      ],
-      explanation: "It's totally normal to worry when you don't feel well! The good news is that most health problems kids have are not serious and get better with time. A doctor can help you understand what's happening and make sure you get better.",
-      doctorReasons: [
-        "To help you feel less worried",
-        "To make sure everything is okay",
-        "To give you the right treatment if needed",
-        "To answer all your questions"
-      ],
-      followUpQuestions: [
-        "What's making you feel most worried?",
-        "Have you talked to an adult about your concerns?",
-        "Is there anything specific that's bothering you?"
-      ],
-      safetyNotes: "Remember, it's always better to ask questions and get help from a real doctor than to worry alone. Doctors are here to help you feel better!"
-    }
-  }
-
-  if (lowerCaseSymptom.includes("how long") || lowerCaseSymptom.includes("when will i feel better")) {
-    return {
-      severity: "moderate",
-      recommendations: [
-        "Most minor illnesses get better in 3-7 days",
-        "Rest and sleep help your body heal faster",
-        "Eat healthy foods and drink lots of water",
-        "Be patient - healing takes time"
-      ],
-      explanation: "Everyone heals at different speeds, but most common illnesses like colds and minor injuries get better within a week. The important thing is to take care of yourself and let your body do its healing work.",
-      doctorReasons: [
-        "If symptoms last longer than expected",
-        "If you're not getting better after a week",
-        "If symptoms get worse instead of better",
-        "If you're worried about how long it's taking"
-      ],
-      followUpQuestions: [
-        "How long have you been feeling this way?",
-        "Are you getting any better at all?",
-        "What have you tried to help yourself feel better?"
-      ],
-      safetyNotes: "If you're not getting better or if you're worried about how long it's taking, it's a good idea to see a doctor who can help you understand what's happening."
-    }
-  }
-
-  if (lowerCaseSymptom.includes("can i go to school") || lowerCaseSymptom.includes("should i stay home")) {
-    return {
-      severity: "moderate",
-      recommendations: [
-        "If you have a fever, it's best to stay home and rest",
-        "If you're coughing a lot, you might want to stay home so you don't spread germs",
-        "If you feel too tired or sick to focus, rest is better than school",
-        "Ask your parents or teachers what they think is best"
-      ],
-      explanation: "When you're sick, your body needs extra energy to fight off the illness. Sometimes staying home and resting helps you get better faster than trying to push through and go to school.",
-      doctorReasons: [
-        "To help you get better faster",
-        "To prevent spreading illness to others",
-        "To make sure you're not making yourself sicker",
-        "To give you the rest your body needs"
-      ],
-      followUpQuestions: [
-        "How are you feeling right now?",
-        "Do you have a fever?",
-        "Are you able to eat and drink normally?"
-      ],
-      safetyNotes: "Your parents and teachers know you best and can help you decide what's right for your situation. When in doubt, it's better to rest and get better than to push yourself too hard."
-    }
-  }
-
   // Default response
   return {
     severity: "moderate",
@@ -273,4 +263,4 @@ function getFallbackAdvice(symptomDescription: string, imageData?: string): Symp
     ],
     safetyNotes: "When in doubt, tell an adult and ask them to help you see a doctor or healthcare provider."
   }
-} 
+}
