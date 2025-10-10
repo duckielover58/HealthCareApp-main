@@ -61,6 +61,33 @@ function getFallbackAdvice(symptomDescription: string, imageData?: string): Symp
     }
   }
 
+  // Check for follow-up questions and provide more detailed responses
+  if (lowerCaseSymptom.includes("what should i do") || lowerCaseSymptom.includes("how do i") || lowerCaseSymptom.includes("can you help")) {
+    return {
+      severity: "moderate",
+      recommendations: [
+        "First, take a deep breath and don't worry - most health problems get better with time",
+        "Tell a trusted adult (parent, teacher, or family member) about how you're feeling",
+        "Rest and take it easy - your body needs time to heal",
+        "Drink plenty of water to stay hydrated",
+        "Eat healthy foods like fruits and vegetables to help your body fight off illness"
+      ],
+      explanation: "It's completely normal to feel worried when you don't feel well. The most important thing is to let an adult know what's happening so they can help you get the care you need.",
+      doctorReasons: [
+        "To make sure you get the right treatment",
+        "To check if there's something more serious going on",
+        "To help you feel better faster",
+        "To give you peace of mind"
+      ],
+      followUpQuestions: [
+        "Have you told an adult about how you're feeling?",
+        "Are you able to eat and drink normally?",
+        "Do you have any other symptoms we should know about?"
+      ],
+      safetyNotes: "Remember, I'm here to help, but a real doctor can examine you and give you the best advice for your specific situation."
+    }
+  }
+
   // Text-based symptom analysis
   if (
     lowerCaseSymptom.includes("chest pain") ||
@@ -145,6 +172,82 @@ function getFallbackAdvice(symptomDescription: string, imageData?: string): Symp
         "Have you told a parent or adult about how you're feeling?"
       ],
       safetyNotes: "Dehydration can be serious, especially for kids and teens. Tell an adult if you can't keep fluids down or feel really bad."
+    }
+  }
+
+  // Check for specific follow-up questions
+  if (lowerCaseSymptom.includes("is it serious") || lowerCaseSymptom.includes("should i worry")) {
+    return {
+      severity: "moderate",
+      recommendations: [
+        "Try not to worry too much - most health problems are not serious",
+        "The best way to know for sure is to talk to a doctor",
+        "Keep track of your symptoms and how you're feeling",
+        "Tell an adult if you're feeling scared or worried"
+      ],
+      explanation: "It's totally normal to worry when you don't feel well! The good news is that most health problems kids have are not serious and get better with time. A doctor can help you understand what's happening and make sure you get better.",
+      doctorReasons: [
+        "To help you feel less worried",
+        "To make sure everything is okay",
+        "To give you the right treatment if needed",
+        "To answer all your questions"
+      ],
+      followUpQuestions: [
+        "What's making you feel most worried?",
+        "Have you talked to an adult about your concerns?",
+        "Is there anything specific that's bothering you?"
+      ],
+      safetyNotes: "Remember, it's always better to ask questions and get help from a real doctor than to worry alone. Doctors are here to help you feel better!"
+    }
+  }
+
+  if (lowerCaseSymptom.includes("how long") || lowerCaseSymptom.includes("when will i feel better")) {
+    return {
+      severity: "moderate",
+      recommendations: [
+        "Most minor illnesses get better in 3-7 days",
+        "Rest and sleep help your body heal faster",
+        "Eat healthy foods and drink lots of water",
+        "Be patient - healing takes time"
+      ],
+      explanation: "Everyone heals at different speeds, but most common illnesses like colds and minor injuries get better within a week. The important thing is to take care of yourself and let your body do its healing work.",
+      doctorReasons: [
+        "If symptoms last longer than expected",
+        "If you're not getting better after a week",
+        "If symptoms get worse instead of better",
+        "If you're worried about how long it's taking"
+      ],
+      followUpQuestions: [
+        "How long have you been feeling this way?",
+        "Are you getting any better at all?",
+        "What have you tried to help yourself feel better?"
+      ],
+      safetyNotes: "If you're not getting better or if you're worried about how long it's taking, it's a good idea to see a doctor who can help you understand what's happening."
+    }
+  }
+
+  if (lowerCaseSymptom.includes("can i go to school") || lowerCaseSymptom.includes("should i stay home")) {
+    return {
+      severity: "moderate",
+      recommendations: [
+        "If you have a fever, it's best to stay home and rest",
+        "If you're coughing a lot, you might want to stay home so you don't spread germs",
+        "If you feel too tired or sick to focus, rest is better than school",
+        "Ask your parents or teachers what they think is best"
+      ],
+      explanation: "When you're sick, your body needs extra energy to fight off the illness. Sometimes staying home and resting helps you get better faster than trying to push through and go to school.",
+      doctorReasons: [
+        "To help you get better faster",
+        "To prevent spreading illness to others",
+        "To make sure you're not making yourself sicker",
+        "To give you the rest your body needs"
+      ],
+      followUpQuestions: [
+        "How are you feeling right now?",
+        "Do you have a fever?",
+        "Are you able to eat and drink normally?"
+      ],
+      safetyNotes: "Your parents and teachers know you best and can help you decide what's right for your situation. When in doubt, it's better to rest and get better than to push yourself too hard."
     }
   }
 

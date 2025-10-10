@@ -54,13 +54,14 @@ function ChatContent() {
 - **Severity:** ${context['severity'] || 'Not specified'}
 - **Duration:** ${context['duration'] || 'Not specified'}
 
-## My recommendations:
+## What you can do:
 ${advice.recommendations.map(rec => `- ${rec}`).join('\n')}
 
-## Why you should consider seeing a doctor:
+## When to see a doctor:
 ${advice.doctorReasons.map(reason => `- ${reason}`).join('\n')}
 
-${advice.safetyNotes ? `## Important:\n${advice.safetyNotes}` : ''}
+${advice.followUpQuestions && advice.followUpQuestions.length > 0 ? `## Questions to think about:\n${advice.followUpQuestions.map(q => `- ${q}`).join('\n')}\n\n` : ''}${advice.safetyNotes ? `## Important:\n${advice.safetyNotes}\n\n` : ''}## Remember:
+**I'm here to help, but a real doctor can examine you in person and give you the best advice for your specific situation. If you're worried or not sure what to do, talk to a trusted adult who can help you see a doctor.**
 
 Feel free to ask me any questions about your symptoms or these recommendations!`
       }
@@ -108,15 +109,14 @@ Feel free to ask me any questions about your symptoms or these recommendations!`
         type: 'assistant' as const,
         content: `I understand your concern. ${advice.explanation}
 
-## Recommendations:
+## What you can do:
 ${advice.recommendations.map(rec => `- ${rec}`).join('\n')}
 
 ## When to see a doctor:
 ${advice.doctorReasons.map(reason => `- ${reason}`).join('\n')}
 
-${advice.safetyNotes ? `## Important:\n${advice.safetyNotes}` : ''}
-
-${advice.followUpQuestions && advice.followUpQuestions.length > 0 ? `## Questions to consider:\n${advice.followUpQuestions.map(q => `- ${q}`).join('\n')}` : ''}`
+${advice.followUpQuestions && advice.followUpQuestions.length > 0 ? `## Questions to think about:\n${advice.followUpQuestions.map(q => `- ${q}`).join('\n')}\n\n` : ''}${advice.safetyNotes ? `## Important:\n${advice.safetyNotes}\n\n` : ''}## Remember:
+**I'm here to help, but a real doctor can examine you in person and give you the best advice for your specific situation. If you're worried or not sure what to do, talk to a trusted adult who can help you see a doctor.**`
       }
       
       setMessages(prev => [...prev, aiResponse])
