@@ -180,8 +180,18 @@ ${advice.followUpQuestions && advice.followUpQuestions.length > 0 ? `## Question
                   <div className={`${message.type === 'user' ? 'text-right' : 'text-left'}`}>
                     <div className="bg-gray-100 p-4 rounded-lg mb-2">
                       {message.type === 'assistant' ? (
-                        <div className="text-sm prose prose-sm max-w-none">
-                          <ReactMarkdown>{message.content}</ReactMarkdown>
+                        <div className="text-sm prose prose-sm max-w-none prose-headings:text-gray-900 prose-strong:text-gray-900 prose-ul:text-gray-700 prose-li:text-gray-700">
+                          <ReactMarkdown
+                            components={{
+                              h2: ({children}) => <h2 className="text-lg font-semibold text-gray-900 mt-4 mb-2">{children}</h2>,
+                              strong: ({children}) => <strong className="font-semibold text-gray-900">{children}</strong>,
+                              ul: ({children}) => <ul className="list-disc list-inside space-y-1 my-2">{children}</ul>,
+                              li: ({children}) => <li className="text-gray-700">{children}</li>,
+                              p: ({children}) => <p className="text-gray-700 mb-2">{children}</p>
+                            }}
+                          >
+                            {message.content}
+                          </ReactMarkdown>
                         </div>
                       ) : (
                         <p className="text-sm">{message.content}</p>
