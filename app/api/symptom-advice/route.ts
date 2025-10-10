@@ -1,72 +1,97 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { SymptomAdvice } from '@/lib/types'
 
+// Simple in-memory rate limiter
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
+const RATE_LIMIT_WINDOW = 60 * 1000 // 1 minute
+const RATE_LIMIT_MAX_REQUESTS = 100 // 100 requests per minute
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now()
+  const userLimit = rateLimitMap.get(ip)
+  
+  if (!userLimit || now > userLimit.resetTime) {
+    // Reset or create new limit
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW })
+    return true
+  }
+  
+  if (userLimit.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return false
+  }
+  
+  userLimit.count++
+  return true
+}
+
 export async function POST(request: NextRequest) {
   try {
     console.log('API route called')
-    const { symptomDescription, imageData } = await request.json()
+    
+    // Check rate limiting
+    const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown'
+    if (!checkRateLimit(ip)) {
+      console.error('Rate limit exceeded for IP:', ip)
+      return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 })
+    }
+    
+    // Parse JSON with proper error handling
+    let body;
+    try {
+      body = await request.json()
+    } catch (jsonError) {
+      console.error('JSON parsing error:', jsonError)
+      return NextResponse.json({ error: 'Invalid JSON format' }, { status: 400 })
+    }
+    
+    const { symptomDescription, imageData } = body
     console.log('Received symptom description:', symptomDescription)
     
     if (!symptomDescription) {
       return NextResponse.json({ error: 'Symptom description is required' }, { status: 400 })
     }
 
-    // Try Hugging Face Inference API (free tier)
-    console.log('Trying Hugging Face API...')
+    // Check for request size limits (1MB max)
+    const contentLength = request.headers.get('content-length')
+    if (contentLength && parseInt(contentLength) > 1024 * 1024) {
+      console.error('Request too large:', contentLength)
+      return NextResponse.json({ error: 'Request too large (max 1MB)' }, { status: 413 })
+    }
     
-    try {
-      const hfResponse = await fetch('https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer hf_your_token_here', // You can get a free token from huggingface.co
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          inputs: `You are a helpful health assistant for children. A child says: "${symptomDescription}". Provide brief, reassuring advice. Always mention seeing a doctor if needed.`
-        })
-      })
-
-      if (hfResponse.ok) {
-        const hfData = await hfResponse.json()
-        console.log('Hugging Face response:', hfData)
-        
-        // Extract text from HF response
-        const aiText = hfData[0]?.generated_text || hfData.generated_text || 'I understand your concern.'
-        
-        return NextResponse.json({
-          severity: "moderate",
-          recommendations: [
-            "Rest and take it easy",
-            "Drink plenty of water",
-            "Tell an adult about your symptoms",
-            "See a doctor if symptoms don't improve"
-          ],
-          explanation: aiText,
-          doctorReasons: [
-            "To get proper medical advice",
-            "To rule out serious conditions",
-            "To help you feel better faster"
-          ],
-          followUpQuestions: [
-            "How are you feeling now?",
-            "Have you told an adult about this?",
-            "Do you have any other symptoms?"
-          ],
-          safetyNotes: "Remember, I'm here to help, but a real doctor can give you the best advice for your specific situation."
-        })
-      }
-    } catch (hfError) {
-      console.log('Hugging Face API failed, using enhanced fallback:', hfError)
+    // Additional check for body size (fallback)
+    const bodyText = JSON.stringify(body)
+    if (bodyText.length > 1024 * 1024) {
+      console.error('Request body too large:', bodyText.length)
+      return NextResponse.json({ error: 'Request too large (max 1MB)' }, { status: 413 })
     }
 
-    // Enhanced fallback with better responses
-    console.log('Using enhanced fallback response')
-    return NextResponse.json(getFallbackAdvice(symptomDescription, imageData))
+    // Use enhanced fallback responses (can be replaced with real AI API)
+    console.log('Using enhanced fallback response for:', symptomDescription.substring(0, 100))
+    const response = NextResponse.json(getFallbackAdvice(symptomDescription, imageData))
+    
+    // Add CORS headers
+    response.headers.set('Access-Control-Allow-Origin', '*')
+    response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS')
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type')
+    
+    return response
 
   } catch (error) {
     console.error('Error in symptom advice API:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
+}
+
+// Handle CORS preflight requests
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  })
 }
 
 // Fallback advice function (moved from client-api.ts)
