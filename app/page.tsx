@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { getSymptomAdviceClient } from "@/lib/client-api"
 import type { SymptomAdvice } from "@/lib/types"
+import ReactMarkdown from "react-markdown"
 
 export default function HomePage() {
   const [currentView, setCurrentView] = useState<'home' | 'quiz' | 'chat' | 'results'>('home')
@@ -337,7 +338,22 @@ export default function HomePage() {
                       const contextMessage = {
                         id: Date.now().toString(),
                         type: 'assistant' as const,
-                        content: `Hi! I see you just completed our health quiz. Based on your answers about ${answers['symptom-type'] || 'your symptoms'}, I have some personalized guidance for you.\n\n**What I understand:**\n• Symptom: ${answers['symptom-type'] || 'Not specified'}\n• Severity: ${answers['severity'] || 'Not specified'}\n• Duration: ${answers['duration'] || 'Not specified'}\n\n**My recommendations:**\n${advice.recommendations.map(rec => `• ${rec}`).join('\n')}\n\n**Why you should consider seeing a doctor:**\n${advice.doctorReasons.map(reason => `• ${reason}`).join('\n')}\n\n${advice.safetyNotes ? `**Important:** ${advice.safetyNotes}` : ''}\n\nFeel free to ask me any questions about your symptoms or these recommendations!`
+                        content: `Hi! I see you just completed our health quiz. Based on your answers about ${answers['symptom-type'] || 'your symptoms'}, I have some personalized guidance for you.
+
+## What I understand:
+- **Symptom:** ${answers['symptom-type'] || 'Not specified'}
+- **Severity:** ${answers['severity'] || 'Not specified'}
+- **Duration:** ${answers['duration'] || 'Not specified'}
+
+## My recommendations:
+${advice.recommendations.map(rec => `- ${rec}`).join('\n')}
+
+## Why you should consider seeing a doctor:
+${advice.doctorReasons.map(reason => `- ${reason}`).join('\n')}
+
+${advice.safetyNotes ? `## Important:\n${advice.safetyNotes}` : ''}
+
+Feel free to ask me any questions about your symptoms or these recommendations!`
                       }
                       setMessages([{
                         id: '1',

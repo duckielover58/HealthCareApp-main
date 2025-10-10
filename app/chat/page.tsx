@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { getSymptomAdviceClient } from "@/lib/client-api"
 import type { SymptomAdvice } from "@/lib/types"
+import ReactMarkdown from "react-markdown"
 
 function ChatContent() {
   const searchParams = useSearchParams()
@@ -46,7 +47,22 @@ function ChatContent() {
       const initialResponse = {
         id: Date.now().toString(),
         type: 'assistant' as const,
-        content: `Hi! I see you just completed our health quiz. Based on your answers about ${context['symptom-type'] || 'your symptoms'}, I have some personalized guidance for you.\n\n**What I understand:**\n• Symptom: ${context['symptom-type'] || 'Not specified'}\n• Severity: ${context['severity'] || 'Not specified'}\n• Duration: ${context['duration'] || 'Not specified'}\n\n**My recommendations:**\n${advice.recommendations.map(rec => `• ${rec}`).join('\n')}\n\n**Why you should consider seeing a doctor:**\n${advice.doctorReasons.map(reason => `• ${reason}`).join('\n')}\n\n${advice.safetyNotes ? `**Important:** ${advice.safetyNotes}` : ''}\n\nFeel free to ask me any questions about your symptoms or these recommendations!`
+        content: `Hi! I see you just completed our health quiz. Based on your answers about ${context['symptom-type'] || 'your symptoms'}, I have some personalized guidance for you.
+
+## What I understand:
+- **Symptom:** ${context['symptom-type'] || 'Not specified'}
+- **Severity:** ${context['severity'] || 'Not specified'}
+- **Duration:** ${context['duration'] || 'Not specified'}
+
+## My recommendations:
+${advice.recommendations.map(rec => `- ${rec}`).join('\n')}
+
+## Why you should consider seeing a doctor:
+${advice.doctorReasons.map(reason => `- ${reason}`).join('\n')}
+
+${advice.safetyNotes ? `## Important:\n${advice.safetyNotes}` : ''}
+
+Feel free to ask me any questions about your symptoms or these recommendations!`
       }
       
       setMessages(prev => [...prev, initialResponse])
@@ -90,7 +106,17 @@ function ChatContent() {
       const aiResponse = {
         id: (Date.now() + 1).toString(),
         type: 'assistant' as const,
-        content: `I understand your concern. ${advice.explanation}\n\n**Recommendations:**\n${advice.recommendations.map(rec => `• ${rec}`).join('\n')}\n\n**When to see a doctor:**\n${advice.doctorReasons.map(reason => `• ${reason}`).join('\n')}\n\n${advice.safetyNotes ? `**Important:** ${advice.safetyNotes}` : ''}\n\n${advice.followUpQuestions && advice.followUpQuestions.length > 0 ? `**Questions to consider:**\n${advice.followUpQuestions.map(q => `• ${q}`).join('\n')}` : ''}`
+        content: `I understand your concern. ${advice.explanation}
+
+## Recommendations:
+${advice.recommendations.map(rec => `- ${rec}`).join('\n')}
+
+## When to see a doctor:
+${advice.doctorReasons.map(reason => `- ${reason}`).join('\n')}
+
+${advice.safetyNotes ? `## Important:\n${advice.safetyNotes}` : ''}
+
+${advice.followUpQuestions && advice.followUpQuestions.length > 0 ? `## Questions to consider:\n${advice.followUpQuestions.map(q => `- ${q}`).join('\n')}` : ''}`
       }
       
       setMessages(prev => [...prev, aiResponse])
@@ -153,7 +179,13 @@ function ChatContent() {
                   
                   <div className={`${message.type === 'user' ? 'text-right' : 'text-left'}`}>
                     <div className="bg-gray-100 p-4 rounded-lg mb-2">
-                      <p className="text-sm">{message.content}</p>
+                      {message.type === 'assistant' ? (
+                        <div className="text-sm prose prose-sm max-w-none">
+                          <ReactMarkdown>{message.content}</ReactMarkdown>
+                        </div>
+                      ) : (
+                        <p className="text-sm">{message.content}</p>
+                      )}
                     </div>
                   </div>
                 </div>

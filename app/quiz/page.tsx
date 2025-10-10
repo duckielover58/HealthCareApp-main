@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { getSymptomAdviceClient } from "@/lib/client-api"
 import type { SymptomAdvice } from "@/lib/types"
+import ReactMarkdown from "react-markdown"
 
 export default function QuizPage() {
   const [currentStep, setCurrentStep] = useState<'quiz' | 'results'>('quiz')
