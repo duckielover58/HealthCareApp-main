@@ -3,88 +3,65 @@ import type { SymptomAdvice } from '@/lib/types'
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('API route called')
     const { symptomDescription, imageData } = await request.json()
+    console.log('Received symptom description:', symptomDescription)
     
     if (!symptomDescription) {
       return NextResponse.json({ error: 'Symptom description is required' }, { status: 400 })
     }
 
-    // Use Google Gemini API for real AI responses
-    const geminiApiKey = process.env.GEMINI_API_KEY || 'AIzaSyDNdAsGso4aUgaMjV2pkIFnr0qe99AvfKE'
+    // Try Hugging Face Inference API (free tier)
+    console.log('Trying Hugging Face API...')
     
-    if (!geminiApiKey) {
-      // Fallback to rule-based responses if no API key
-      return NextResponse.json(getFallbackAdvice(symptomDescription, imageData))
-    }
-
-    // Create a prompt for Gemini
-    const prompt = `You are a helpful AI health assistant for children and teens (ages 8-15). Provide health guidance based on the symptom description. Be reassuring, use simple language, and always encourage consulting with a real doctor.
-
-Symptom description: ${symptomDescription}
-${imageData ? 'Note: User has also provided an image for analysis.' : ''}
-
-Please respond with a JSON object in this exact format:
-{
-  "severity": "mild" | "moderate" | "serious" | "emergency",
-  "recommendations": ["recommendation1", "recommendation2", "recommendation3"],
-  "explanation": "Simple explanation of what this might be",
-  "doctorReasons": ["reason1", "reason2", "reason3"],
-  "followUpQuestions": ["question1", "question2", "question3"],
-  "safetyNotes": "Important safety information if needed"
-}
-
-Guidelines:
-- Use age-appropriate language
-- Be reassuring and not scary
-- Always include reasons to see a doctor
-- Focus on general guidance, not diagnosis
-- Keep recommendations practical and simple
-- Emphasize telling adults about concerns
-- Respond ONLY with valid JSON, no other text`
-
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: prompt
-          }]
-        }],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 1000
-        }
-      })
-    })
-
-    if (!response.ok) {
-      console.error('Gemini API error:', response.status, response.statusText)
-      throw new Error(`Gemini API error: ${response.status}`)
-    }
-
-    const data = await response.json()
-    const aiResponse = data.candidates[0].content.parts[0].text
-
     try {
-      // Parse the JSON response from AI
-      const advice: SymptomAdvice = JSON.parse(aiResponse)
-      
-      // Validate the response structure
-      if (!advice.severity || !advice.recommendations || !advice.explanation) {
-        throw new Error('Invalid response structure from AI')
-      }
+      const hfResponse = await fetch('https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer hf_your_token_here', // You can get a free token from huggingface.co
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          inputs: `You are a helpful health assistant for children. A child says: "${symptomDescription}". Provide brief, reassuring advice. Always mention seeing a doctor if needed.`
+        })
+      })
 
-      console.log('Successfully got Gemini AI response:', advice)
-      return NextResponse.json(advice)
-    } catch (parseError) {
-      console.error('Error parsing AI response:', parseError)
-      console.log('Raw AI response:', aiResponse)
-      // Fallback to rule-based response if AI response is malformed
-      return NextResponse.json(getFallbackAdvice(symptomDescription, imageData))
+      if (hfResponse.ok) {
+        const hfData = await hfResponse.json()
+        console.log('Hugging Face response:', hfData)
+        
+        // Extract text from HF response
+        const aiText = hfData[0]?.generated_text || hfData.generated_text || 'I understand your concern.'
+        
+        return NextResponse.json({
+          severity: "moderate",
+          recommendations: [
+            "Rest and take it easy",
+            "Drink plenty of water",
+            "Tell an adult about your symptoms",
+            "See a doctor if symptoms don't improve"
+          ],
+          explanation: aiText,
+          doctorReasons: [
+            "To get proper medical advice",
+            "To rule out serious conditions",
+            "To help you feel better faster"
+          ],
+          followUpQuestions: [
+            "How are you feeling now?",
+            "Have you told an adult about this?",
+            "Do you have any other symptoms?"
+          ],
+          safetyNotes: "Remember, I'm here to help, but a real doctor can give you the best advice for your specific situation."
+        })
+      }
+    } catch (hfError) {
+      console.log('Hugging Face API failed, using enhanced fallback:', hfError)
     }
+
+    // Enhanced fallback with better responses
+    console.log('Using enhanced fallback response')
+    return NextResponse.json(getFallbackAdvice(symptomDescription, imageData))
 
   } catch (error) {
     console.error('Error in symptom advice API:', error)
