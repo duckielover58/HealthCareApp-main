@@ -111,7 +111,12 @@ function ChatContent() {
     <div className="min-h-screen bg-white">
       <header className="bg-blue-600 text-white p-4">
         <div className="container mx-auto">
-          <h1 className="text-2xl font-bold">HealthBuddy</h1>
+          <h1 
+            className="text-2xl font-bold cursor-pointer hover:text-blue-200 transition-colors"
+            onClick={() => window.location.href = '/'}
+          >
+            HealthBuddy
+          </h1>
         </div>
       </header>
       
@@ -192,7 +197,12 @@ function LoadingFallback() {
     <div className="min-h-screen bg-white">
       <header className="bg-blue-600 text-white p-4">
         <div className="container mx-auto">
-          <h1 className="text-2xl font-bold">HealthBuddy</h1>
+          <h1 
+            className="text-2xl font-bold cursor-pointer hover:text-blue-200 transition-colors"
+            onClick={() => window.location.href = '/'}
+          >
+            HealthBuddy
+          </h1>
         </div>
       </header>
       
