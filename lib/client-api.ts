@@ -3,34 +3,131 @@ import type { SymptomAdvice } from "./types"
 // Client-side API service
 export async function getSymptomAdviceClient(symptomDescription: string, imageData?: string): Promise<SymptomAdvice> {
   try {
-    console.log('🔄 Calling API with symptom:', symptomDescription.substring(0, 50) + '...')
+    console.log('🔄 Getting AI advice for symptom:', symptomDescription.substring(0, 50) + '...')
     
-    // Always try the API first (works in both development and production)
-    const response = await fetch('/api/symptom-advice', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ 
-        symptomDescription,
-        imageData 
-      }),
-    })
+    // Try Google Gemini API directly from client (works on GitHub Pages)
+    try {
+      const geminiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
+      if (geminiKey) {
+        console.log('🤖 Trying Google Gemini API...')
+        const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: `You are a helpful health assistant for children ages 8-15. A child says: "${symptomDescription}". Provide brief, reassuring advice in simple language. Always mention seeing a doctor if needed. Keep your response under 200 words and be encouraging.`
+              }]
+            }],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 200,
+            }
+          })
+        })
 
-    console.log('📡 API Response status:', response.status)
-    console.log('📡 API Response headers:', Object.fromEntries(response.headers.entries()))
-
-    if (response.ok) {
-      const data = await response.json()
-      console.log('✅ Successfully got AI response from API:', data)
-      return data
-    } else {
-      const errorText = await response.text()
-      console.error('❌ API response not ok:', response.status, response.statusText, errorText)
-      throw new Error(`API error: ${response.status} - ${errorText}`)
+        if (geminiResponse.ok) {
+          const geminiData = await geminiResponse.json()
+          console.log('✅ Google Gemini response received')
+          
+          const aiText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'I understand your concern.'
+          
+          return {
+            severity: "moderate",
+            recommendations: [
+              "Rest and take it easy",
+              "Drink plenty of water",
+              "Tell an adult about your symptoms",
+              "See a doctor if symptoms don't improve"
+            ],
+            explanation: aiText,
+            doctorReasons: [
+              "To get proper medical advice",
+              "To rule out serious conditions",
+              "To help you feel better faster"
+            ],
+            followUpQuestions: [
+              "How are you feeling now?",
+              "Have you told an adult about this?",
+              "Do you have any other symptoms?"
+            ],
+            safetyNotes: "Remember, I'm here to help, but a real doctor can give you the best advice for your specific situation."
+          }
+        }
+      }
+    } catch (geminiError) {
+      console.log('❌ Google Gemini API failed:', geminiError.message)
     }
+
+    // Try OpenAI API directly from client (works on GitHub Pages)
+    try {
+      const openaiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY
+      if (openaiKey) {
+        console.log('🤖 Trying OpenAI API...')
+        const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openaiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: "gpt-3.5-turbo",
+            messages: [
+              {
+                role: "system",
+                content: "You are a helpful health assistant for children ages 8-15. Provide brief, reassuring advice in simple language. Always mention seeing a doctor if needed. Keep responses under 200 words."
+              },
+              {
+                role: "user",
+                content: `A child says: "${symptomDescription}". Provide helpful health advice.`
+              }
+            ],
+            max_tokens: 200,
+            temperature: 0.7
+          })
+        })
+
+        if (openaiResponse.ok) {
+          const openaiData = await openaiResponse.json()
+          console.log('✅ OpenAI response received')
+          
+          const aiText = openaiData.choices[0]?.message?.content || 'I understand your concern.'
+          
+          return {
+            severity: "moderate",
+            recommendations: [
+              "Rest and take it easy",
+              "Drink plenty of water",
+              "Tell an adult about your symptoms",
+              "See a doctor if symptoms don't improve"
+            ],
+            explanation: aiText,
+            doctorReasons: [
+              "To get proper medical advice",
+              "To rule out serious conditions",
+              "To help you feel better faster"
+            ],
+            followUpQuestions: [
+              "How are you feeling now?",
+              "Have you told an adult about this?",
+              "Do you have any other symptoms?"
+            ],
+            safetyNotes: "Remember, I'm here to help, but a real doctor can give you the best advice for your specific situation."
+          }
+        }
+      }
+    } catch (openaiError) {
+      console.log('❌ OpenAI API failed:', openaiError.message)
+    }
+
+    // Fallback to enhanced rule-based responses
+    console.log('🔄 Using enhanced fallback responses')
+    return getFallbackAdvice(symptomDescription, imageData)
+    
   } catch (error) {
-    console.error('❌ Error getting symptom advice from API:', error)
+    console.error('❌ Error getting symptom advice:', error)
     console.log('🔄 Falling back to rule-based responses')
     return getFallbackAdvice(symptomDescription, imageData)
   }
