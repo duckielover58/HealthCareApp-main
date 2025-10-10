@@ -65,7 +65,198 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Request too large (max 1MB)' }, { status: 413 })
     }
 
-    // Use enhanced fallback responses (can be replaced with real AI API)
+    // Try free AI APIs first, then fallback
+    console.log('Attempting AI API calls for:', symptomDescription.substring(0, 100))
+    
+    // Try Hugging Face Inference API (free tier)
+    try {
+      const hfToken = process.env.HUGGINGFACE_TOKEN
+      if (hfToken && hfToken !== 'hf_your_token_here') {
+        console.log('Trying Hugging Face API...')
+        const hfResponse = await fetch('https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${hfToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            inputs: `You are a helpful health assistant for children. A child says: "${symptomDescription}". Provide brief, reassuring advice. Always mention seeing a doctor if needed.`
+          })
+        })
+
+        if (hfResponse.ok) {
+          const hfData = await hfResponse.json()
+          console.log('Hugging Face response received')
+          
+          // Extract text from HF response
+          const aiText = hfData[0]?.generated_text || hfData.generated_text || 'I understand your concern.'
+          
+          const response = NextResponse.json({
+            severity: "moderate",
+            recommendations: [
+              "Rest and take it easy",
+              "Drink plenty of water",
+              "Tell an adult about your symptoms",
+              "See a doctor if symptoms don't improve"
+            ],
+            explanation: aiText,
+            doctorReasons: [
+              "To get proper medical advice",
+              "To rule out serious conditions",
+              "To help you feel better faster"
+            ],
+            followUpQuestions: [
+              "How are you feeling now?",
+              "Have you told an adult about this?",
+              "Do you have any other symptoms?"
+            ],
+            safetyNotes: "Remember, I'm here to help, but a real doctor can give you the best advice for your specific situation."
+          })
+          
+          // Add CORS headers
+          response.headers.set('Access-Control-Allow-Origin', '*')
+          response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS')
+          response.headers.set('Access-Control-Allow-Headers', 'Content-Type')
+          
+          return response
+        }
+      }
+    } catch (hfError) {
+      console.log('Hugging Face API failed:', hfError.message)
+    }
+
+    // Try Google Gemini API (if key is provided)
+    try {
+      const geminiKey = process.env.GEMINI_API_KEY
+      if (geminiKey) {
+        console.log('Trying Google Gemini API...')
+        const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: `You are a helpful health assistant for children ages 8-15. A child says: "${symptomDescription}". Provide brief, reassuring advice in simple language. Always mention seeing a doctor if needed. Keep your response under 200 words and be encouraging.`
+              }]
+            }],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 200,
+            }
+          })
+        })
+
+        if (geminiResponse.ok) {
+          const geminiData = await geminiResponse.json()
+          console.log('Google Gemini response received')
+          
+          const aiText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'I understand your concern.'
+          
+          const response = NextResponse.json({
+            severity: "moderate",
+            recommendations: [
+              "Rest and take it easy",
+              "Drink plenty of water",
+              "Tell an adult about your symptoms",
+              "See a doctor if symptoms don't improve"
+            ],
+            explanation: aiText,
+            doctorReasons: [
+              "To get proper medical advice",
+              "To rule out serious conditions",
+              "To help you feel better faster"
+            ],
+            followUpQuestions: [
+              "How are you feeling now?",
+              "Have you told an adult about this?",
+              "Do you have any other symptoms?"
+            ],
+            safetyNotes: "Remember, I'm here to help, but a real doctor can give you the best advice for your specific situation."
+          })
+          
+          // Add CORS headers
+          response.headers.set('Access-Control-Allow-Origin', '*')
+          response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS')
+          response.headers.set('Access-Control-Allow-Headers', 'Content-Type')
+          
+          return response
+        }
+      }
+    } catch (geminiError) {
+      console.log('Google Gemini API failed:', geminiError.message)
+    }
+
+    // Try OpenAI API (if key is provided)
+    try {
+      const openaiKey = process.env.OPENAI_API_KEY
+      if (openaiKey) {
+        console.log('Trying OpenAI API...')
+        const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openaiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: "gpt-3.5-turbo",
+            messages: [
+              {
+                role: "system",
+                content: "You are a helpful health assistant for children ages 8-15. Provide brief, reassuring advice in simple language. Always mention seeing a doctor if needed. Keep responses under 200 words."
+              },
+              {
+                role: "user",
+                content: `A child says: "${symptomDescription}". Provide helpful health advice.`
+              }
+            ],
+            max_tokens: 200,
+            temperature: 0.7
+          })
+        })
+
+        if (openaiResponse.ok) {
+          const openaiData = await openaiResponse.json()
+          console.log('OpenAI response received')
+          
+          const aiText = openaiData.choices[0]?.message?.content || 'I understand your concern.'
+          
+          const response = NextResponse.json({
+            severity: "moderate",
+            recommendations: [
+              "Rest and take it easy",
+              "Drink plenty of water",
+              "Tell an adult about your symptoms",
+              "See a doctor if symptoms don't improve"
+            ],
+            explanation: aiText,
+            doctorReasons: [
+              "To get proper medical advice",
+              "To rule out serious conditions",
+              "To help you feel better faster"
+            ],
+            followUpQuestions: [
+              "How are you feeling now?",
+              "Have you told an adult about this?",
+              "Do you have any other symptoms?"
+            ],
+            safetyNotes: "Remember, I'm here to help, but a real doctor can give you the best advice for your specific situation."
+          })
+          
+          // Add CORS headers
+          response.headers.set('Access-Control-Allow-Origin', '*')
+          response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS')
+          response.headers.set('Access-Control-Allow-Headers', 'Content-Type')
+          
+          return response
+        }
+      }
+    } catch (openaiError) {
+      console.log('OpenAI API failed:', openaiError.message)
+    }
+
+    // Fallback to enhanced rule-based responses
     console.log('Using enhanced fallback response for:', symptomDescription.substring(0, 100))
     const response = NextResponse.json(getFallbackAdvice(symptomDescription, imageData))
     

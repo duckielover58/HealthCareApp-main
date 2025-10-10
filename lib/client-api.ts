@@ -3,6 +3,8 @@ import type { SymptomAdvice } from "./types"
 // Client-side API service
 export async function getSymptomAdviceClient(symptomDescription: string, imageData?: string): Promise<SymptomAdvice> {
   try {
+    console.log('🔄 Calling API with symptom:', symptomDescription.substring(0, 50) + '...')
+    
     // Always try the API first (works in both development and production)
     const response = await fetch('/api/symptom-advice', {
       method: 'POST',
@@ -15,17 +17,21 @@ export async function getSymptomAdviceClient(symptomDescription: string, imageDa
       }),
     })
 
+    console.log('📡 API Response status:', response.status)
+    console.log('📡 API Response headers:', Object.fromEntries(response.headers.entries()))
+
     if (response.ok) {
       const data = await response.json()
-      console.log('Successfully got AI response:', data)
+      console.log('✅ Successfully got AI response from API:', data)
       return data
     } else {
-      console.error('API response not ok:', response.status, response.statusText)
-      throw new Error(`API error: ${response.status}`)
+      const errorText = await response.text()
+      console.error('❌ API response not ok:', response.status, response.statusText, errorText)
+      throw new Error(`API error: ${response.status} - ${errorText}`)
     }
   } catch (error) {
-    console.error('Error getting symptom advice from API:', error)
-    console.log('Falling back to rule-based responses')
+    console.error('❌ Error getting symptom advice from API:', error)
+    console.log('🔄 Falling back to rule-based responses')
     return getFallbackAdvice(symptomDescription, imageData)
   }
 }
