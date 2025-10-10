@@ -7,7 +7,8 @@ export async function getSymptomAdviceClient(symptomDescription: string, imageDa
     
     // Try Google Gemini API directly from client (works on GitHub Pages)
     try {
-      const geminiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
+      const geminiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyDNdAsGso4aUgaMjV2pkIFnr0qe99AvfKE'
+      console.log('🔑 Gemini API Key available:', !!geminiKey, geminiKey ? 'Key length: ' + geminiKey.length : 'No key')
       if (geminiKey) {
         console.log('🤖 Trying Google Gemini API...')
         const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
