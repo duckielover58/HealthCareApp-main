@@ -58,7 +58,7 @@ export async function getSymptomAdviceClient(symptomDescription: string, imageDa
         }
       }
     } catch (geminiError) {
-      console.log('❌ Google Gemini API failed:', geminiError.message)
+      console.log('❌ Google Gemini API failed:', geminiError instanceof Error ? geminiError.message : String(geminiError))
     }
 
     // Try OpenAI API directly from client (works on GitHub Pages)
@@ -119,7 +119,7 @@ export async function getSymptomAdviceClient(symptomDescription: string, imageDa
         }
       }
     } catch (openaiError) {
-      console.log('❌ OpenAI API failed:', openaiError.message)
+      console.log('❌ OpenAI API failed:', openaiError instanceof Error ? openaiError.message : String(openaiError))
     }
 
     // Fallback to enhanced rule-based responses

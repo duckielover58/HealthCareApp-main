@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     console.log('API route called')
     
     // Check rate limiting
-    const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown'
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
     if (!checkRateLimit(ip)) {
       console.error('Rate limit exceeded for IP:', ip)
       return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 })
@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
         }
       }
     } catch (hfError) {
-      console.log('Hugging Face API failed:', hfError.message)
+      console.log('Hugging Face API failed:', hfError instanceof Error ? hfError.message : String(hfError))
     }
 
     // Try Google Gemini API (if key is provided)
@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
         }
       }
     } catch (geminiError) {
-      console.log('Google Gemini API failed:', geminiError.message)
+      console.log('Google Gemini API failed:', geminiError instanceof Error ? geminiError.message : String(geminiError))
     }
 
     // Try OpenAI API (if key is provided)
@@ -253,7 +253,7 @@ export async function POST(request: NextRequest) {
         }
       }
     } catch (openaiError) {
-      console.log('OpenAI API failed:', openaiError.message)
+      console.log('OpenAI API failed:', openaiError instanceof Error ? openaiError.message : String(openaiError))
     }
 
     // Fallback to enhanced rule-based responses
