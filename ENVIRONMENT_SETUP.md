@@ -8,7 +8,8 @@ Create a `.env.local` file in the root directory of your project with the follow
 
 ```bash
 # Google Gemini API Key - Keep this secure and never commit to version control
-GEMINI_API_KEY=AIzaSyD4LQulkj9wW0s96ri8KjB1OaI3kiGTHXk
+# Get your API key from: https://ai.google.dev
+GEMINI_API_KEY=your_gemini_api_key_here
 
 # Environment Configuration
 NODE_ENV=development

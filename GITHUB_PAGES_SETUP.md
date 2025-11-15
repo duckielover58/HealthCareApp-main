@@ -22,7 +22,7 @@ You need to add your API keys as GitHub repository secrets:
 4. Add these secrets:
 
 **Secret Name**: `NEXT_PUBLIC_GEMINI_API_KEY`
-**Secret Value**: `AIzaSyDNdAsGso4aUgaMjV2pkIFnr0qe99AvfKE`
+**Secret Value**: `your_gemini_api_key_here`
 
 **Secret Name**: `NEXT_PUBLIC_OPENAI_API_KEY` (optional)
 **Secret Value**: `your_openai_key_here`
