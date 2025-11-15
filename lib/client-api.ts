@@ -9,6 +9,12 @@ export async function getSymptomAdviceClient(symptomDescription: string, imageDa
     try {
       const geminiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
       console.log('🔑 Gemini API Key available:', !!geminiKey, geminiKey ? 'Key length: ' + geminiKey.length : 'No key')
+      
+      if (!geminiKey || geminiKey === 'your_gemini_api_key_here') {
+        console.warn('⚠️ Gemini API key not configured. Please add NEXT_PUBLIC_GEMINI_API_KEY to your .env file and restart the dev server.')
+        throw new Error('Gemini API key not configured')
+      }
+      
       if (geminiKey) {
         console.log('🤖 Trying Google Gemini API...')
         const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
@@ -29,13 +35,22 @@ export async function getSymptomAdviceClient(symptomDescription: string, imageDa
           })
         })
 
-        if (geminiResponse.ok) {
-          const geminiData = await geminiResponse.json()
-          console.log('✅ Google Gemini response received')
-          
-          const aiText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'I understand your concern.'
-          
-          return {
+        if (!geminiResponse.ok) {
+          const errorData = await geminiResponse.json().catch(() => ({ error: 'Unknown error' }))
+          console.error('❌ Gemini API error:', geminiResponse.status, geminiResponse.statusText, errorData)
+          throw new Error(`Gemini API error: ${geminiResponse.status} - ${JSON.stringify(errorData)}`)
+        }
+
+        const geminiData = await geminiResponse.json()
+        console.log('✅ Google Gemini response received')
+        
+        const aiText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'I understand your concern.'
+        
+        if (!aiText || aiText === 'I understand your concern.') {
+          console.warn('⚠️ Gemini API returned empty or default text, response:', geminiData)
+        }
+        
+        return {
             severity: "moderate",
             recommendations: [
               "Rest and take it easy",
