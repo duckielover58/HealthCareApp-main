@@ -8,10 +8,16 @@ export async function getSymptomAdviceClient(symptomDescription: string, imageDa
     // Try Google Gemini API directly from client (works on GitHub Pages)
     try {
       const geminiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
-      console.log('🔑 Gemini API Key available:', !!geminiKey, geminiKey ? 'Key length: ' + geminiKey.length : 'No key')
+      console.log('🔑 Gemini API Key check:', {
+        exists: !!geminiKey,
+        length: geminiKey?.length || 0,
+        startsWith: geminiKey?.substring(0, 10) || 'N/A',
+        fullKey: geminiKey ? geminiKey.substring(0, 15) + '...' : 'NOT FOUND'
+      })
       
       if (!geminiKey || geminiKey === 'your_gemini_api_key_here') {
-        console.warn('⚠️ Gemini API key not configured. Please add NEXT_PUBLIC_GEMINI_API_KEY to your .env file and restart the dev server.')
+        console.error('❌ Gemini API key not configured!')
+        console.error('⚠️ Please add NEXT_PUBLIC_GEMINI_API_KEY to your .env file and RESTART the dev server (stop and start npm run dev)')
         throw new Error('Gemini API key not configured')
       }
       
@@ -35,19 +41,25 @@ export async function getSymptomAdviceClient(symptomDescription: string, imageDa
           })
         })
 
+        console.log('📡 Gemini API Response Status:', geminiResponse.status, geminiResponse.statusText)
+        
         if (!geminiResponse.ok) {
           const errorData = await geminiResponse.json().catch(() => ({ error: 'Unknown error' }))
-          console.error('❌ Gemini API error:', geminiResponse.status, geminiResponse.statusText, errorData)
+          console.error('❌ Gemini API error:', geminiResponse.status, geminiResponse.statusText)
+          console.error('Error details:', errorData)
           throw new Error(`Gemini API error: ${geminiResponse.status} - ${JSON.stringify(errorData)}`)
         }
 
         const geminiData = await geminiResponse.json()
         console.log('✅ Google Gemini response received')
+        console.log('📦 Response data:', geminiData)
         
         const aiText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'I understand your concern.'
+        console.log('📝 Extracted AI text:', aiText.substring(0, 100) + '...')
         
         if (!aiText || aiText === 'I understand your concern.') {
-          console.warn('⚠️ Gemini API returned empty or default text, response:', geminiData)
+          console.warn('⚠️ Gemini API returned empty or default text')
+          console.warn('Full response:', JSON.stringify(geminiData, null, 2))
         }
         
         return {
@@ -71,7 +83,6 @@ export async function getSymptomAdviceClient(symptomDescription: string, imageDa
             ],
             safetyNotes: "Remember, I'm here to help, but a real doctor can give you the best advice for your specific situation."
           }
-        }
       }
     } catch (geminiError) {
       console.log('❌ Google Gemini API failed:', geminiError instanceof Error ? geminiError.message : String(geminiError))
