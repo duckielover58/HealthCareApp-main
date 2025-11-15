@@ -8,10 +8,16 @@ export async function getSymptomAdviceClient(symptomDescription: string, imageDa
     // Try Google Gemini API directly from client (works on GitHub Pages)
     try {
       const geminiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
-      console.log('🔑 Gemini API Key available:', !!geminiKey, geminiKey ? 'Key length: ' + geminiKey.length : 'No key')
+      console.log('🔑 Gemini API Key check:', {
+        exists: !!geminiKey,
+        length: geminiKey?.length || 0,
+        startsWith: geminiKey?.substring(0, 10) || 'N/A',
+        fullKey: geminiKey ? geminiKey.substring(0, 15) + '...' : 'NOT FOUND'
+      })
       
       if (!geminiKey || geminiKey === 'your_gemini_api_key_here') {
-        console.warn('⚠️ Gemini API key not configured. Please add NEXT_PUBLIC_GEMINI_API_KEY to your .env file and restart the dev server.')
+        console.error('❌ Gemini API key not configured!')
+        console.error('⚠️ Please add NEXT_PUBLIC_GEMINI_API_KEY to your .env file and RESTART the dev server (stop and start npm run dev)')
         throw new Error('Gemini API key not configured')
       }
       
@@ -35,19 +41,35 @@ export async function getSymptomAdviceClient(symptomDescription: string, imageDa
           })
         })
 
+        console.log('📡 Gemini API Response Status:', geminiResponse.status, geminiResponse.statusText)
+        
         if (!geminiResponse.ok) {
           const errorData = await geminiResponse.json().catch(() => ({ error: 'Unknown error' }))
-          console.error('❌ Gemini API error:', geminiResponse.status, geminiResponse.statusText, errorData)
+          console.error('❌ Gemini API error:', geminiResponse.status, geminiResponse.statusText)
+          console.error('Error details:', errorData)
+          
+          // Handle specific error cases
+          if (geminiResponse.status === 429) {
+            const errorMessage = errorData?.error?.message || 'Rate limit exceeded'
+            console.error('🚫 QUOTA EXCEEDED: Your Gemini API key has no quota or has exceeded the rate limit.')
+            console.error('💡 Solution: Check your Google Cloud Console to enable the API and set up billing/quota.')
+            console.error('📖 Help: https://cloud.google.com/docs/quotas/help/request_increase')
+            throw new Error(`Gemini API quota exceeded: ${errorMessage}`)
+          }
+          
           throw new Error(`Gemini API error: ${geminiResponse.status} - ${JSON.stringify(errorData)}`)
         }
 
         const geminiData = await geminiResponse.json()
         console.log('✅ Google Gemini response received')
+        console.log('📦 Response data:', geminiData)
         
         const aiText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'I understand your concern.'
+        console.log('📝 Extracted AI text:', aiText.substring(0, 100) + '...')
         
         if (!aiText || aiText === 'I understand your concern.') {
-          console.warn('⚠️ Gemini API returned empty or default text, response:', geminiData)
+          console.warn('⚠️ Gemini API returned empty or default text')
+          console.warn('Full response:', JSON.stringify(geminiData, null, 2))
         }
         
         return {
@@ -71,7 +93,6 @@ export async function getSymptomAdviceClient(symptomDescription: string, imageDa
             ],
             safetyNotes: "Remember, I'm here to help, but a real doctor can give you the best advice for your specific situation."
           }
-        }
       }
     } catch (geminiError) {
       console.log('❌ Google Gemini API failed:', geminiError instanceof Error ? geminiError.message : String(geminiError))
@@ -105,33 +126,47 @@ export async function getSymptomAdviceClient(symptomDescription: string, imageDa
           })
         })
 
-        if (openaiResponse.ok) {
-          const openaiData = await openaiResponse.json()
-          console.log('✅ OpenAI response received')
+        console.log('📡 OpenAI API Response Status:', openaiResponse.status, openaiResponse.statusText)
+        
+        if (!openaiResponse.ok) {
+          const errorData = await openaiResponse.json().catch(() => ({ error: 'Unknown error' }))
+          console.error('❌ OpenAI API error:', openaiResponse.status, openaiResponse.statusText)
+          console.error('Error details:', errorData)
           
-          const aiText = openaiData.choices[0]?.message?.content || 'I understand your concern.'
-          
-          return {
-            severity: "moderate",
-            recommendations: [
-              "Rest and take it easy",
-              "Drink plenty of water",
-              "Tell an adult about your symptoms",
-              "See a doctor if symptoms don't improve"
-            ],
-            explanation: aiText,
-            doctorReasons: [
-              "To get proper medical advice",
-              "To rule out serious conditions",
-              "To help you feel better faster"
-            ],
-            followUpQuestions: [
-              "How are you feeling now?",
-              "Have you told an adult about this?",
-              "Do you have any other symptoms?"
-            ],
-            safetyNotes: "Remember, I'm here to help, but a real doctor can give you the best advice for your specific situation."
+          if (openaiResponse.status === 401) {
+            console.error('🔐 UNAUTHORIZED: Your OpenAI API key is invalid or missing.')
+            console.error('💡 Solution: Check your .env file and make sure NEXT_PUBLIC_OPENAI_API_KEY is set correctly.')
+            throw new Error('OpenAI API key is invalid or unauthorized')
           }
+          
+          throw new Error(`OpenAI API error: ${openaiResponse.status} - ${JSON.stringify(errorData)}`)
+        }
+
+        const openaiData = await openaiResponse.json()
+        console.log('✅ OpenAI response received')
+        
+        const aiText = openaiData.choices[0]?.message?.content || 'I understand your concern.'
+        
+        return {
+          severity: "moderate",
+          recommendations: [
+            "Rest and take it easy",
+            "Drink plenty of water",
+            "Tell an adult about your symptoms",
+            "See a doctor if symptoms don't improve"
+          ],
+          explanation: aiText,
+          doctorReasons: [
+            "To get proper medical advice",
+            "To rule out serious conditions",
+            "To help you feel better faster"
+          ],
+          followUpQuestions: [
+            "How are you feeling now?",
+            "Have you told an adult about this?",
+            "Do you have any other symptoms?"
+          ],
+          safetyNotes: "Remember, I'm here to help, but a real doctor can give you the best advice for your specific situation."
         }
       }
     } catch (openaiError) {

@@ -134,28 +134,36 @@ ${advice.followUpQuestions && advice.followUpQuestions.length > 0 ? `## Question
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="bg-blue-600 text-white p-4">
-        <div className="container mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-teal-50 to-emerald-50">
+      <header className="bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-700 text-white p-4 shadow-lg">
+        <div className="container mx-auto flex justify-between items-center">
           <h1 
-            className="text-2xl font-bold cursor-pointer hover:text-blue-200 transition-colors"
+            className="text-3xl font-bold cursor-pointer hover:scale-105 transition-transform"
             onClick={() => window.location.href = '/'}
           >
-            HealthBuddy
+            💬 HealthBuddy Chat 💬
           </h1>
+          <a 
+            href="/login"
+            className="bg-white text-teal-600 px-6 py-2 rounded-full font-bold hover:bg-teal-50 transform hover:scale-105 transition-all shadow-lg"
+          >
+            🔐 Sign In
+          </a>
         </div>
       </header>
       
       <div className="max-w-4xl mx-auto px-4 py-6 pb-40">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Chat with AI Health Assistant</h1>
+        <div className="mb-6 text-center">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-teal-600 to-cyan-500 bg-clip-text text-transparent">
+            Chat with AI Health Assistant! 🤖
+          </h1>
           {quizContext && (
-            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <h3 className="text-sm font-semibold text-blue-800 mb-2">📋 Quiz Results</h3>
-              <div className="text-sm text-blue-700 space-y-1">
-                <p><strong>Symptom:</strong> {quizContext['symptom-type'] || 'Not specified'}</p>
-                <p><strong>Severity:</strong> {quizContext['severity'] || 'Not specified'}</p>
-                <p><strong>Duration:</strong> {quizContext['duration'] || 'Not specified'}</p>
+            <div className="mt-4 p-5 bg-gradient-to-br from-cyan-100 to-teal-100 border-4 border-cyan-300 rounded-3xl shadow-lg">
+              <h3 className="text-lg font-bold text-teal-800 mb-3">📋 Quiz Results</h3>
+              <div className="text-base text-teal-700 space-y-2 font-semibold">
+                <p><strong>🌟 Symptom:</strong> {quizContext['symptom-type'] || 'Not specified'}</p>
+                <p><strong>⚡ Severity:</strong> {quizContext['severity'] || 'Not specified'}</p>
+                <p><strong>⏰ Duration:</strong> {quizContext['duration'] || 'Not specified'}</p>
               </div>
             </div>
           )}
@@ -169,16 +177,20 @@ ${advice.followUpQuestions && advice.followUpQuestions.length > 0 ? `## Question
             >
               <div className={`max-w-[80%] ${message.type === 'user' ? 'order-2' : 'order-1'}`}>
                 <div className={`flex items-start gap-3 ${message.type === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 text-xl font-bold shadow-lg ${
                     message.type === 'user' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-gray-200 text-gray-600'
+                      ? 'bg-gradient-to-br from-teal-500 to-cyan-500 text-white' 
+                      : 'bg-gradient-to-br from-cyan-400 to-teal-400 text-white'
                   }`}>
-                    {message.type === 'user' ? 'U' : 'A'}
+                    {message.type === 'user' ? '👤' : '🤖'}
                   </div>
                   
                   <div className={`${message.type === 'user' ? 'text-right' : 'text-left'}`}>
-                    <div className="bg-gray-100 p-4 rounded-lg mb-2">
+                    <div className={`p-5 rounded-3xl mb-2 shadow-lg ${
+                      message.type === 'user'
+                        ? 'bg-gradient-to-br from-teal-200 to-cyan-200 border-2 border-teal-300'
+                        : 'bg-gradient-to-br from-cyan-100 to-teal-100 border-2 border-cyan-300'
+                    }`}>
                       {message.type === 'assistant' ? (
                         <div className="text-sm">
                           <ReactMarkdown
@@ -204,27 +216,29 @@ ${advice.followUpQuestions && advice.followUpQuestions.length > 0 ? `## Question
           ))}
         </div>
         
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4">
-          <div className="max-w-4xl mx-auto flex gap-2">
+        <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-cyan-100 to-teal-100 border-t-4 border-cyan-300 p-4 shadow-2xl">
+          <div className="max-w-4xl mx-auto flex gap-3">
             <input
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Describe your symptoms..."
-              className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500"
+              placeholder="Describe your symptoms... 😊"
+              className="flex-1 border-4 border-cyan-300 rounded-full px-6 py-4 text-lg focus:outline-none focus:border-teal-400 focus:ring-4 focus:ring-teal-200 shadow-lg"
             />
             <button 
               onClick={handleSend}
               disabled={!inputValue.trim() || isLoading}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+              className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-8 py-4 rounded-full font-bold hover:from-teal-600 hover:to-cyan-600 disabled:opacity-50 transform hover:scale-105 transition-all shadow-lg text-lg flex items-center gap-2"
             >
               {isLoading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-5 h-5 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
                   Sending...
                 </>
               ) : (
-                'Send'
+                <>
+                  ✉️ Send
+                </>
               )}
             </button>
           </div>
