@@ -47,19 +47,19 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl">
-          {isLogin ? 'Welcome Back' : 'Create Account'}
+    <Card className="w-full max-w-md mx-auto border-0 shadow-none bg-transparent">
+      <CardHeader className="text-center pb-4">
+        <CardTitle className="text-2xl font-bold text-teal-800">
+          {isLogin ? 'Welcome Back! 👋' : 'Create Account! 🎉'}
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-teal-600 font-medium">
           {isLogin 
             ? 'Sign in to access your health history' 
             : 'Create an account to save your health assessments'
           }
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-0">
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <Alert variant="destructive">
@@ -77,7 +77,7 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
                 placeholder="Enter your username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="pl-10"
+                className="pl-10 rounded-full border-2 border-cyan-200 focus:border-teal-400 focus:ring-2 focus:ring-teal-200"
                 required
               />
             </div>
@@ -93,7 +93,7 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pl-10 pr-10"
+                className="pl-10 pr-10 rounded-full border-2 border-cyan-200 focus:border-teal-400 focus:ring-2 focus:ring-teal-200"
                 required
               />
               <Button
@@ -114,13 +114,13 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
 
           <Button
             type="submit"
-            className="w-full"
+            className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600 rounded-full py-6 text-lg font-bold shadow-lg transform hover:scale-105 transition-all"
             disabled={isLoading || !username || !password}
           >
             {isLoading ? (
               'Loading...'
             ) : (
-              isLogin ? 'Sign In' : 'Create Account'
+              isLogin ? '🔐 Sign In' : '✨ Create Account'
             )}
           </Button>
 

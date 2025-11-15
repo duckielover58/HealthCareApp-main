@@ -127,35 +127,47 @@ export default function HomePage() {
   if (currentView === 'quiz') {
     const question = questions[currentQuestion]
     return (
-      <div className="min-h-screen bg-white">
-        <header className="bg-blue-600 text-white p-4">
+      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-teal-50 to-emerald-50">
+        <header className="bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-700 text-white p-4 shadow-lg">
           <div className="container mx-auto flex justify-between items-center">
-            <h1 className="text-2xl font-bold">HealthBuddy</h1>
-            <button 
-              onClick={resetToHome}
-              className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-blue-50"
-            >
-              Back to Home
-            </button>
+            <h1 className="text-3xl font-bold">🌟 HealthBuddy Quiz 🌟</h1>
+            <div className="flex items-center gap-3">
+              <a 
+                href="/login"
+                className="bg-white text-teal-600 px-4 py-2 rounded-full font-semibold hover:bg-teal-50 transform hover:scale-105 transition-all shadow-md text-sm"
+              >
+                🔐 Sign In
+              </a>
+              <button 
+                onClick={resetToHome}
+                className="bg-white text-teal-600 px-6 py-3 rounded-full font-bold hover:bg-teal-50 transform hover:scale-105 transition-all shadow-lg"
+              >
+                🏠 Back to Home
+              </button>
+            </div>
           </div>
         </header>
         
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-2xl mx-auto">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Health Assessment Quiz</h1>
-              <p className="text-gray-600">Question {currentQuestion + 1} of {questions.length}</p>
+            <div className="mb-8 text-center">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-teal-600 to-cyan-500 bg-clip-text text-transparent mb-3">
+                Health Assessment Quiz 🎯
+              </h1>
+              <div className="inline-block bg-gradient-to-r from-cyan-300 to-teal-300 px-6 py-2 rounded-full">
+                <p className="text-lg font-bold text-teal-800">Question {currentQuestion + 1} of {questions.length}</p>
+              </div>
             </div>
 
-            <div className="bg-white border rounded-lg p-6 shadow-sm">
-              <h2 className="text-xl font-semibold mb-6">{question.question}</h2>
+            <div className="bg-gradient-to-br from-white to-cyan-50 border-4 border-cyan-300 rounded-3xl p-8 shadow-2xl">
+              <h2 className="text-2xl font-bold text-gray-800 mb-8 text-center">{question.question}</h2>
               
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {question.options.map((option, index) => (
                   <button
                     key={index}
                     onClick={() => handleQuizAnswer(option)}
-                    className="w-full text-left p-4 border rounded-lg hover:bg-gray-50 hover:border-blue-300 transition-colors"
+                    className="w-full text-left p-5 bg-gradient-to-r from-teal-100 to-cyan-100 border-4 border-teal-300 rounded-2xl hover:from-teal-200 hover:to-cyan-200 hover:border-teal-400 hover:scale-105 transition-all shadow-md font-semibold text-gray-800"
                   >
                     {option}
                   </button>
@@ -171,22 +183,32 @@ export default function HomePage() {
   // Chat View
   if (currentView === 'chat') {
     return (
-      <div className="min-h-screen bg-white">
-        <header className="bg-blue-600 text-white p-4">
+      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-teal-50 to-emerald-50">
+        <header className="bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-700 text-white p-4 shadow-lg">
           <div className="container mx-auto flex justify-between items-center">
-            <h1 className="text-2xl font-bold">HealthBuddy</h1>
-            <button 
-              onClick={resetToHome}
-              className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-blue-50"
-            >
-              Back to Home
-            </button>
+            <h1 className="text-3xl font-bold">💬 HealthBuddy Chat 💬</h1>
+            <div className="flex items-center gap-3">
+              <a 
+                href="/login"
+                className="bg-white text-teal-600 px-4 py-2 rounded-full font-semibold hover:bg-teal-50 transform hover:scale-105 transition-all shadow-md text-sm"
+              >
+                🔐 Sign In
+              </a>
+              <button 
+                onClick={resetToHome}
+                className="bg-white text-teal-600 px-6 py-3 rounded-full font-bold hover:bg-teal-50 transform hover:scale-105 transition-all shadow-lg"
+              >
+                🏠 Back to Home
+              </button>
+            </div>
           </div>
         </header>
         
         <div className="max-w-4xl mx-auto px-4 py-6 pb-40">
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Chat with AI Health Assistant</h1>
+          <div className="mb-6 text-center">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-teal-600 to-cyan-500 bg-clip-text text-transparent">
+              Chat with AI Health Assistant! 🤖
+            </h1>
           </div>
 
           <div className="space-y-4 mb-4">
@@ -197,16 +219,20 @@ export default function HomePage() {
               >
                 <div className={`max-w-[80%] ${message.type === 'user' ? 'order-2' : 'order-1'}`}>
                   <div className={`flex items-start gap-3 ${message.type === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 text-xl font-bold shadow-lg ${
                       message.type === 'user' 
-                        ? 'bg-blue-600 text-white' 
-                        : 'bg-gray-200 text-gray-600'
+                        ? 'bg-gradient-to-br from-teal-500 to-cyan-500 text-white' 
+                        : 'bg-gradient-to-br from-cyan-400 to-teal-400 text-white'
                     }`}>
-                      {message.type === 'user' ? 'U' : 'A'}
+                      {message.type === 'user' ? '👤' : '🤖'}
                     </div>
                     
                     <div className={`${message.type === 'user' ? 'text-right' : 'text-left'}`}>
-                    <div className="bg-gray-100 p-4 rounded-lg mb-2">
+                    <div className={`p-5 rounded-3xl mb-2 shadow-lg ${
+                      message.type === 'user'
+                        ? 'bg-gradient-to-br from-teal-200 to-cyan-200 border-2 border-teal-300'
+                        : 'bg-gradient-to-br from-cyan-100 to-teal-100 border-2 border-cyan-300'
+                    }`}>
                       {message.type === 'assistant' ? (
                         <div className="text-sm">
                           <ReactMarkdown
@@ -232,21 +258,21 @@ export default function HomePage() {
             ))}
           </div>
           
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4">
-            <div className="max-w-4xl mx-auto flex gap-2">
+          <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-cyan-100 to-teal-100 border-t-4 border-cyan-300 p-4 shadow-2xl">
+            <div className="max-w-4xl mx-auto flex gap-3">
               <input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleChatSend()}
-                placeholder="Describe your symptoms..."
-                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500"
+                placeholder="Describe your symptoms... 😊"
+                className="flex-1 border-4 border-cyan-300 rounded-full px-6 py-4 text-lg focus:outline-none focus:border-teal-400 focus:ring-4 focus:ring-teal-200 shadow-lg"
               />
               <button 
                 onClick={handleChatSend}
                 disabled={!inputValue.trim()}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50"
+                className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-8 py-4 rounded-full font-bold hover:from-teal-600 hover:to-cyan-600 disabled:opacity-50 transform hover:scale-105 transition-all shadow-lg text-lg"
               >
-                Send
+                ✉️ Send
               </button>
             </div>
           </div>
@@ -258,28 +284,38 @@ export default function HomePage() {
   // Results View
   if (currentView === 'results') {
     return (
-      <div className="min-h-screen bg-white">
-        <header className="bg-blue-600 text-white p-4">
+      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-teal-50 to-emerald-50">
+        <header className="bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-700 text-white p-4 shadow-lg">
           <div className="container mx-auto flex justify-between items-center">
-            <h1 className="text-2xl font-bold">HealthBuddy</h1>
-            <button 
-              onClick={resetToHome}
-              className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-blue-50"
-            >
-              Back to Home
-            </button>
+            <h1 className="text-3xl font-bold">🎉 HealthBuddy Results 🎉</h1>
+            <div className="flex items-center gap-3">
+              <a 
+                href="/login"
+                className="bg-white text-teal-600 px-4 py-2 rounded-full font-semibold hover:bg-teal-50 transform hover:scale-105 transition-all shadow-md text-sm"
+              >
+                🔐 Sign In
+              </a>
+              <button 
+                onClick={resetToHome}
+                className="bg-white text-teal-600 px-6 py-3 rounded-full font-bold hover:bg-teal-50 transform hover:scale-105 transition-all shadow-lg"
+              >
+                🏠 Back to Home
+              </button>
+            </div>
           </div>
         </header>
         
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">🎉 Quiz Complete!</h2>
-              <p className="text-lg text-gray-600">Based on your answers, here's what we recommend:</p>
+              <h2 className="text-5xl font-bold bg-gradient-to-r from-teal-600 via-cyan-500 to-teal-500 bg-clip-text text-transparent mb-4">
+                🎉 Quiz Complete! 🎉
+              </h2>
+              <p className="text-xl text-gray-700 font-semibold">Based on your answers, here's what we recommend:</p>
             </div>
 
             {/* Quiz Results Summary */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+            <div className="bg-gradient-to-br from-cyan-100 to-teal-100 border-4 border-cyan-300 rounded-3xl p-6 mb-8 shadow-lg">
               <h3 className="text-xl font-semibold text-blue-800 mb-4">📋 Your Quiz Results</h3>
               <div className="grid md:grid-cols-3 gap-4 text-sm">
                 <div>
@@ -307,32 +343,32 @@ export default function HomePage() {
             ) : advice ? (
               <div className="space-y-6">
                 {/* Recommendations */}
-                <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                  <h3 className="text-xl font-semibold text-green-800 mb-4">💡 What You Can Do</h3>
-                  <div className="space-y-2">
+                <div className="bg-gradient-to-br from-emerald-100 to-teal-100 border-4 border-emerald-300 rounded-3xl p-6 shadow-lg">
+                  <h3 className="text-2xl font-bold text-teal-800 mb-4">💡 What You Can Do</h3>
+                  <div className="space-y-3">
                     {advice.recommendations.map((recommendation, index) => (
-                      <div key={index} className="flex items-start gap-3">
-                        <span className="text-green-600 font-bold">•</span>
-                        <p className="text-green-700">{recommendation}</p>
+                      <div key={index} className="flex items-start gap-3 bg-white rounded-2xl p-4 border-2 border-emerald-200">
+                        <span className="text-2xl">✨</span>
+                        <p className="text-teal-800 font-semibold text-lg">{recommendation}</p>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Explanation */}
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-4">📝 What This Means</h3>
-                  <p className="text-gray-700 leading-relaxed">{advice.explanation}</p>
+                <div className="bg-gradient-to-br from-cyan-100 to-teal-100 border-4 border-cyan-300 rounded-3xl p-6 shadow-lg">
+                  <h3 className="text-2xl font-bold text-cyan-800 mb-4">📝 What This Means</h3>
+                  <p className="text-cyan-800 leading-relaxed text-lg font-medium bg-white rounded-2xl p-4 border-2 border-cyan-200">{advice.explanation}</p>
                 </div>
 
                 {/* When to See a Doctor */}
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                  <h3 className="text-xl font-semibold text-yellow-800 mb-4">🏥 When to See a Doctor</h3>
-                  <div className="space-y-2">
+                <div className="bg-gradient-to-br from-teal-100 to-cyan-100 border-4 border-teal-300 rounded-3xl p-6 shadow-lg">
+                  <h3 className="text-2xl font-bold text-teal-800 mb-4">🏥 When to See a Doctor</h3>
+                  <div className="space-y-3">
                     {advice.doctorReasons.map((reason, index) => (
-                      <div key={index} className="flex items-start gap-3">
-                        <span className="text-yellow-600 font-bold">•</span>
-                        <p className="text-yellow-700">{reason}</p>
+                      <div key={index} className="flex items-start gap-3 bg-white rounded-2xl p-4 border-2 border-teal-200">
+                        <span className="text-2xl">🏥</span>
+                        <p className="text-teal-800 font-semibold text-lg">{reason}</p>
                       </div>
                     ))}
                   </div>
@@ -340,9 +376,9 @@ export default function HomePage() {
 
                 {/* Safety Notes */}
                 {advice.safetyNotes && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-                    <h3 className="text-xl font-semibold text-red-800 mb-4">⚠️ Important</h3>
-                    <p className="text-red-700 leading-relaxed">{advice.safetyNotes}</p>
+                  <div className="bg-gradient-to-br from-red-100 to-orange-100 border-4 border-red-300 rounded-3xl p-6 shadow-lg">
+                    <h3 className="text-2xl font-bold text-red-800 mb-4">⚠️ Important</h3>
+                    <p className="text-red-800 leading-relaxed text-lg font-semibold bg-white rounded-2xl p-4 border-2 border-red-200">{advice.safetyNotes}</p>
                   </div>
                 )}
 
@@ -378,14 +414,14 @@ Feel free to ask me any questions about your symptoms or these recommendations!`
                       }, contextMessage])
                       setCurrentView('chat')
                     }}
-                    className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                    className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-10 py-5 rounded-full text-xl font-bold hover:from-teal-600 hover:to-cyan-600 transform hover:scale-105 transition-all shadow-xl flex items-center justify-center gap-3"
                   >
                     🤖 Chat with AI Assistant
-                    <span className="text-sm opacity-90">(Get more help)</span>
+                    <span className="text-base opacity-90">(Get more help)</span>
                   </button>
                   <button 
                     onClick={resetToHome}
-                    className="bg-gray-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-700 transition-colors"
+                    className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-10 py-5 rounded-full text-xl font-bold hover:from-gray-600 hover:to-gray-700 transform hover:scale-105 transition-all shadow-xl"
                   >
                     🏠 Back to Home
                   </button>
@@ -400,56 +436,67 @@ Feel free to ask me any questions about your symptoms or these recommendations!`
 
   // Home View
   return (
-    <div className="min-h-screen bg-white">
-        <header className="bg-blue-600 text-white p-4">
-          <div className="container mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-teal-50 to-emerald-50">
+        <header className="bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-700 text-white p-4 shadow-lg">
+          <div className="container mx-auto flex justify-between items-center">
             <h1 
-              className="text-2xl font-bold cursor-pointer hover:text-blue-200 transition-colors"
+              className="text-3xl font-bold cursor-pointer hover:scale-105 transition-transform"
               onClick={() => setCurrentView('home')}
             >
-              HealthBuddy
+              🌟 HealthBuddy 🌟
             </h1>
+            <div className="flex items-center gap-3">
+              <a 
+                href="/login"
+                className="bg-white text-teal-600 px-6 py-2 rounded-full font-bold hover:bg-teal-50 transform hover:scale-105 transition-all shadow-lg"
+              >
+                🔐 Sign In
+              </a>
+            </div>
           </div>
         </header>
       
       <main className="container mx-auto px-4 py-8">
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-            Your Personal Health Assistant
+          <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-teal-600 via-cyan-500 to-teal-500 bg-clip-text text-transparent mb-6">
+            Your Personal Health Assistant! 🎉
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Get instant health guidance, track your symptoms, and make informed decisions about your well-being.
+          <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto font-medium">
+            Get instant health guidance, track your symptoms, and make informed decisions about your well-being! 😊
           </p>
-          <div className="flex gap-4 justify-center">
+          <div className="flex flex-wrap gap-4 justify-center">
             <button 
               onClick={() => setCurrentView('quiz')}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700"
+              className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-8 py-4 rounded-full text-lg font-bold hover:from-teal-600 hover:to-cyan-600 transform hover:scale-105 transition-all shadow-lg hover:shadow-xl"
             >
-              Start Health Quiz
+              🎯 Start Health Quiz
             </button>
             <button 
               onClick={() => setCurrentView('chat')}
-              className="bg-white text-blue-600 border-2 border-blue-600 px-6 py-3 rounded-lg text-lg font-semibold hover:bg-blue-50"
+              className="bg-gradient-to-r from-cyan-500 to-teal-500 text-white px-8 py-4 rounded-full text-lg font-bold hover:from-cyan-600 hover:to-teal-600 transform hover:scale-105 transition-all shadow-lg hover:shadow-xl"
             >
-              Chat with AI
+              💬 Chat with AI
             </button>
           </div>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 mb-16">
-          <div className="text-center p-6 border rounded-lg">
-            <h3 className="text-xl font-semibold mb-2">AI-Powered Chat</h3>
-            <p className="text-gray-600">Get personalized health advice through natural conversation.</p>
+          <div className="text-center p-8 bg-gradient-to-br from-cyan-100 to-teal-100 border-4 border-cyan-300 rounded-3xl shadow-lg hover:scale-105 transition-transform">
+            <div className="text-5xl mb-4">🤖</div>
+            <h3 className="text-2xl font-bold text-teal-800 mb-3">AI-Powered Chat</h3>
+            <p className="text-teal-700 font-medium">Get personalized health advice through natural conversation!</p>
           </div>
           
-          <div className="text-center p-6 border rounded-lg">
-            <h3 className="text-xl font-semibold mb-2">Guided Health Quiz</h3>
-            <p className="text-gray-600">Answer simple questions to get targeted recommendations.</p>
+          <div className="text-center p-8 bg-gradient-to-br from-teal-100 to-cyan-100 border-4 border-teal-300 rounded-3xl shadow-lg hover:scale-105 transition-transform">
+            <div className="text-5xl mb-4">📋</div>
+            <h3 className="text-2xl font-bold text-cyan-800 mb-3">Guided Health Quiz</h3>
+            <p className="text-cyan-700 font-medium">Answer simple questions to get targeted recommendations!</p>
           </div>
           
-          <div className="text-center p-6 border rounded-lg">
-            <h3 className="text-xl font-semibold mb-2">Privacy First</h3>
-            <p className="text-gray-600">Your health data stays private and secure.</p>
+          <div className="text-center p-8 bg-gradient-to-br from-emerald-100 to-teal-100 border-4 border-emerald-300 rounded-3xl shadow-lg hover:scale-105 transition-transform">
+            <div className="text-5xl mb-4">🔒</div>
+            <h3 className="text-2xl font-bold text-emerald-800 mb-3">Privacy First</h3>
+            <p className="text-emerald-700 font-medium">Your health data stays private and secure!</p>
           </div>
         </div>
       </main>

@@ -47,6 +47,16 @@ export async function getSymptomAdviceClient(symptomDescription: string, imageDa
           const errorData = await geminiResponse.json().catch(() => ({ error: 'Unknown error' }))
           console.error('❌ Gemini API error:', geminiResponse.status, geminiResponse.statusText)
           console.error('Error details:', errorData)
+          
+          // Handle specific error cases
+          if (geminiResponse.status === 429) {
+            const errorMessage = errorData?.error?.message || 'Rate limit exceeded'
+            console.error('🚫 QUOTA EXCEEDED: Your Gemini API key has no quota or has exceeded the rate limit.')
+            console.error('💡 Solution: Check your Google Cloud Console to enable the API and set up billing/quota.')
+            console.error('📖 Help: https://cloud.google.com/docs/quotas/help/request_increase')
+            throw new Error(`Gemini API quota exceeded: ${errorMessage}`)
+          }
+          
           throw new Error(`Gemini API error: ${geminiResponse.status} - ${JSON.stringify(errorData)}`)
         }
 
@@ -116,33 +126,47 @@ export async function getSymptomAdviceClient(symptomDescription: string, imageDa
           })
         })
 
-        if (openaiResponse.ok) {
-          const openaiData = await openaiResponse.json()
-          console.log('✅ OpenAI response received')
+        console.log('📡 OpenAI API Response Status:', openaiResponse.status, openaiResponse.statusText)
+        
+        if (!openaiResponse.ok) {
+          const errorData = await openaiResponse.json().catch(() => ({ error: 'Unknown error' }))
+          console.error('❌ OpenAI API error:', openaiResponse.status, openaiResponse.statusText)
+          console.error('Error details:', errorData)
           
-          const aiText = openaiData.choices[0]?.message?.content || 'I understand your concern.'
-          
-          return {
-            severity: "moderate",
-            recommendations: [
-              "Rest and take it easy",
-              "Drink plenty of water",
-              "Tell an adult about your symptoms",
-              "See a doctor if symptoms don't improve"
-            ],
-            explanation: aiText,
-            doctorReasons: [
-              "To get proper medical advice",
-              "To rule out serious conditions",
-              "To help you feel better faster"
-            ],
-            followUpQuestions: [
-              "How are you feeling now?",
-              "Have you told an adult about this?",
-              "Do you have any other symptoms?"
-            ],
-            safetyNotes: "Remember, I'm here to help, but a real doctor can give you the best advice for your specific situation."
+          if (openaiResponse.status === 401) {
+            console.error('🔐 UNAUTHORIZED: Your OpenAI API key is invalid or missing.')
+            console.error('💡 Solution: Check your .env file and make sure NEXT_PUBLIC_OPENAI_API_KEY is set correctly.')
+            throw new Error('OpenAI API key is invalid or unauthorized')
           }
+          
+          throw new Error(`OpenAI API error: ${openaiResponse.status} - ${JSON.stringify(errorData)}`)
+        }
+
+        const openaiData = await openaiResponse.json()
+        console.log('✅ OpenAI response received')
+        
+        const aiText = openaiData.choices[0]?.message?.content || 'I understand your concern.'
+        
+        return {
+          severity: "moderate",
+          recommendations: [
+            "Rest and take it easy",
+            "Drink plenty of water",
+            "Tell an adult about your symptoms",
+            "See a doctor if symptoms don't improve"
+          ],
+          explanation: aiText,
+          doctorReasons: [
+            "To get proper medical advice",
+            "To rule out serious conditions",
+            "To help you feel better faster"
+          ],
+          followUpQuestions: [
+            "How are you feeling now?",
+            "Have you told an adult about this?",
+            "Do you have any other symptoms?"
+          ],
+          safetyNotes: "Remember, I'm here to help, but a real doctor can give you the best advice for your specific situation."
         }
       }
     } catch (openaiError) {
